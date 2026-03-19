@@ -7,7 +7,6 @@ Create Date: 2026-03-16
 from typing import Sequence, Union
 from alembic import op
 import sqlalchemy as sa
-from sqlalchemy.dialects.postgresql import UUID
 
 revision: str = "001"
 down_revision: Union[str, None] = None
@@ -16,18 +15,6 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-
-    try:
-        # Enable TimescaleDB extension
-        op.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE")
-        # Convert to TimescaleDB hypertable
-        op.execute(
-            "SELECT create_hypertable('wait_time_observations', 'observed_at', "
-            "migrate_data => true, if_not_exists => true)"
-        )
-    except Exception as e:
-        pass  
-
     # Ports of Entry
     op.create_table(
         "ports_of_entry",
@@ -56,7 +43,7 @@ def upgrade() -> None:
         sa.Column("name_es", sa.String(100), nullable=False),
     )
 
-    # Wait Time Observations (will become hypertable)
+    # Wait Time Observations
     op.create_table(
         "wait_time_observations",
         sa.Column("observed_at", sa.DateTime(timezone=True), nullable=False),
@@ -71,7 +58,6 @@ def upgrade() -> None:
         sa.Column("ingested_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
         sa.PrimaryKeyConstraint("observed_at", "port_id", "lane_type_id"),
     )
-
 
     op.create_index(
         "idx_wto_port_lane",
@@ -96,46 +82,8 @@ def upgrade() -> None:
         sa.UniqueConstraint("port_id", "lane_type_id", "prediction_date", "hour"),
     )
 
-    # User Preferences
-    op.create_table(
-        "user_preferences",
-        sa.Column("id", UUID(as_uuid=True), primary_key=True, server_default=sa.text("gen_random_uuid()")),
-        sa.Column("device_id", sa.String(200), unique=True, nullable=False),
-        sa.Column("language", sa.String(5), server_default="en"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-    )
-
-    # Favorites
-    op.create_table(
-        "favorites",
-        sa.Column("id", sa.Integer(), autoincrement=True, primary_key=True),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("user_preferences.id"), nullable=False),
-        sa.Column("port_id", sa.Integer(), sa.ForeignKey("ports_of_entry.id"), nullable=False),
-        sa.Column("lane_type_id", sa.Integer(), sa.ForeignKey("lane_types.id"), nullable=True),
-        sa.Column("sort_order", sa.SmallInteger(), server_default="0"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-        sa.UniqueConstraint("user_id", "port_id", "lane_type_id"),
-    )
-
-    # Alert Subscriptions
-    op.create_table(
-        "alert_subscriptions",
-        sa.Column("id", sa.Integer(), autoincrement=True, primary_key=True),
-        sa.Column("user_id", UUID(as_uuid=True), sa.ForeignKey("user_preferences.id"), nullable=False),
-        sa.Column("port_id", sa.Integer(), sa.ForeignKey("ports_of_entry.id"), nullable=False),
-        sa.Column("lane_type_id", sa.Integer(), sa.ForeignKey("lane_types.id"), nullable=True),
-        sa.Column("threshold_min", sa.Integer(), nullable=False),
-        sa.Column("direction", sa.String(10), server_default="above"),
-        sa.Column("is_active", sa.Boolean(), server_default="true"),
-        sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now()),
-    )
-
 
 def downgrade() -> None:
-    op.drop_table("alert_subscriptions")
-    op.drop_table("favorites")
-    op.drop_table("user_preferences")
     op.drop_table("predictions")
     op.drop_table("wait_time_observations")
     op.drop_table("lane_types")
