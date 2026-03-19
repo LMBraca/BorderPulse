@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Map, Heart, Settings, Radio } from "lucide-react";
+import { Home, Map, Heart, Settings, Radio, Github, Coffee } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/", icon: Home, label: "Home" },
@@ -58,10 +58,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           ))}
         </nav>
 
-        <div className="px-4 py-4 border-t border-subtle">
-          <p className="text-[10px] text-slate-700">
-            Data from CBP · Updated every 15 min
-          </p>
+        <div className="px-4 py-4 border-t border-subtle space-y-2">
+          <a
+            href="https://github.com/LMBraca/BorderPulse"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors"
+          >
+            <Github size={14} />
+            Source on GitHub
+          </a>
+          <a
+            href="https://buymeacoffee.com/lmbraca"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors"
+          >
+            <Coffee size={14} />
+            Buy me a coffee
+          </a>
         </div>
       </aside>
 
