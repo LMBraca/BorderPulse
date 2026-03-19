@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Info, Globe } from "lucide-react";
+import { Info, Globe, Github, Coffee } from "lucide-react";
 import { BORDER_TIMEZONES, getUserTimezone, setUserTimezone } from "@/lib/timezone";
 
 export default function SettingsPage() {
@@ -66,6 +66,26 @@ export default function SettingsPage() {
                 Predictions based on historical day-of-week and hour-of-day
                 patterns. They improve as data accumulates.
               </p>
+            </div>
+            <div className="flex gap-3 mt-4 pt-3 border-t border-subtle">
+              <a
+                href="https://github.com/LMBraca/BorderPulse"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <Github size={14} />
+                GitHub
+              </a>
+              <a
+                href="https://buymeacoffee.com/lmbraca"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+              >
+                <Coffee size={14} />
+                Buy me a coffee
+              </a>
             </div>
           </div>
         </div>
