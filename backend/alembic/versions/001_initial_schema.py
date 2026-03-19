@@ -16,8 +16,17 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Enable TimescaleDB extension
-    op.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE")
+
+    try:
+        # Enable TimescaleDB extension
+        op.execute("CREATE EXTENSION IF NOT EXISTS timescaledb CASCADE")
+        # Convert to TimescaleDB hypertable
+        op.execute(
+            "SELECT create_hypertable('wait_time_observations', 'observed_at', "
+            "migrate_data => true, if_not_exists => true)"
+        )
+    except Exception as e:
+        pass  
 
     # Ports of Entry
     op.create_table(
@@ -63,11 +72,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("observed_at", "port_id", "lane_type_id"),
     )
 
-    # Convert to TimescaleDB hypertable
-    op.execute(
-        "SELECT create_hypertable('wait_time_observations', 'observed_at', "
-        "migrate_data => true, if_not_exists => true)"
-    )
 
     op.create_index(
         "idx_wto_port_lane",
