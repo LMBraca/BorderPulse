@@ -138,6 +138,7 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
             cityUs=port.city_us or "",
             cityMx=port.city_mx or "",
             stateUs=port.state_us or "",
+            stateMx=port.state_mx or "",
             latitude=float(port.latitude),
             longitude=float(port.longitude),
             isActive=port.is_active,

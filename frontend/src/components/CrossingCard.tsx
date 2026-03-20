@@ -16,6 +16,17 @@ interface CrossingCardProps {
   onFavToggle?: () => void;
 }
 
+// Mexican state abbreviations
+const MX_STATE_ABBR: Record<string, string> = {
+  "Baja California": "BC",
+  "Baja California Sur": "BCS",
+  "Sonora": "Son.",
+  "Chihuahua": "Chih.",
+  "Coahuila": "Coah.",
+  "Nuevo León": "NL",
+  "Tamaulipas": "Tamps.",
+};
+
 // Short labels for the compact lane row
 const SHORT_LABELS: Record<string, string> = {
   standard_vehicle: "Std",
@@ -68,7 +79,7 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
               {crossing.name}
             </h3>
             <p className="text-xs text-slate-500 mt-0.5 truncate">
-              {crossing.cityUs}, {crossing.stateUs} → {crossing.cityMx}
+              {crossing.cityMx}, {MX_STATE_ABBR[crossing.stateMx] ?? crossing.stateMx} → {crossing.cityUs}, {crossing.stateUs}
             </p>
           </div>
 

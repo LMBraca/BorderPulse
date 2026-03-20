@@ -176,6 +176,7 @@ def normalize_cbp_record(record: dict, port_map: dict, lane_map: dict) -> list[d
         ("sentri", record.get("passenger_vehicle_lanes", {}), "NEXUS_SENTRI_lanes"),
         ("ready_lane", record.get("passenger_vehicle_lanes", {}), "ready_lanes"),
         ("pedestrian", record.get("pedestrian_lanes", {}), "standard_lanes"),
+        ("pedestrian_ready", record.get("pedestrian_lanes", {}), "ready_lanes"),
         ("commercial", record.get("commercial_vehicle_lanes", {}), "standard_lanes"),
     ]
 

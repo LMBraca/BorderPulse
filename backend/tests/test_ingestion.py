@@ -72,24 +72,39 @@ class TestNormalizeCbpRecord:
         return {
             "standard_vehicle": 1,
             "sentri": 2,
-            "pedestrian": 3,
-            "commercial": 4,
+            "ready_lane": 3,
+            "pedestrian": 4,
+            "pedestrian_ready": 5,
+            "commercial": 6,
         }
 
     def test_known_port_produces_observations(self, port_map, lane_map):
         record = {
             "port_number": "250401",
+            "date": "3/18/2026",
+            "time": "10:22:17",
             "passenger_vehicle_lanes": {
-                "delay_minutes": "45",
-                "lanes_open": "6",
+                "standard_lanes": {
+                    "delay_minutes": "45",
+                    "lanes_open": "6",
+                    "operational_status": "45",
+                },
+                "NEXUS_SENTRI_lanes": {
+                    "delay_minutes": "10",
+                    "lanes_open": "2",
+                    "operational_status": "10",
+                },
             },
             "pedestrian_lanes": {
-                "delay_minutes": "15",
-                "lanes_open": "3",
+                "standard_lanes": {
+                    "delay_minutes": "15",
+                    "lanes_open": "3",
+                    "operational_status": "15",
+                },
             },
         }
         observations = normalize_cbp_record(record, port_map, lane_map)
-        assert len(observations) >= 2
+        assert len(observations) >= 3
         vehicle_obs = [o for o in observations if o["lane_type_id"] == 1]
         assert len(vehicle_obs) == 1
         assert vehicle_obs[0]["wait_minutes"] == 45
@@ -103,8 +118,11 @@ class TestNormalizeCbpRecord:
         record = {
             "port_number": "250401",
             "passenger_vehicle_lanes": {
-                "delay_minutes": "Lanes Closed",
-                "lanes_open": "0",
+                "standard_lanes": {
+                    "delay_minutes": "Lanes Closed",
+                    "lanes_open": "0",
+                    "operational_status": "Lanes Closed",
+                },
             },
         }
         observations = normalize_cbp_record(record, port_map, lane_map)
@@ -119,6 +137,29 @@ class TestNormalizeCbpRecord:
             "passenger_vehicle_lanes": {},
         }
         observations = normalize_cbp_record(record, port_map, lane_map)
-        # Empty dict is falsy, so it gets skipped
         vehicle_obs = [o for o in observations if o["lane_type_id"] == 1]
         assert len(vehicle_obs) == 0
+
+    def test_pedestrian_ready_lane(self, port_map, lane_map):
+        record = {
+            "port_number": "250401",
+            "pedestrian_lanes": {
+                "standard_lanes": {
+                    "delay_minutes": "20",
+                    "lanes_open": "4",
+                    "operational_status": "20",
+                },
+                "ready_lanes": {
+                    "delay_minutes": "5",
+                    "lanes_open": "2",
+                    "operational_status": "5",
+                },
+            },
+        }
+        observations = normalize_cbp_record(record, port_map, lane_map)
+        ped_obs = [o for o in observations if o["lane_type_id"] == 4]
+        ped_ready_obs = [o for o in observations if o["lane_type_id"] == 5]
+        assert len(ped_obs) == 1
+        assert ped_obs[0]["wait_minutes"] == 20
+        assert len(ped_ready_obs) == 1
+        assert ped_ready_obs[0]["wait_minutes"] == 5

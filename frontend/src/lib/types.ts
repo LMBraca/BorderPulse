@@ -14,6 +14,7 @@ export interface CrossingSummary {
   cityUs: string;
   cityMx: string;
   stateUs: string;
+  stateMx: string;
   latitude: number;
   longitude: number;
   isActive: boolean;
@@ -108,6 +109,7 @@ export const LANE_LABELS: Record<string, string> = {
   sentri: "SENTRI",
   ready_lane: "Ready Lane",
   pedestrian: "Pedestrian",
+  pedestrian_ready: "Ped. Ready Lane",
   commercial: "Commercial",
 };
 
