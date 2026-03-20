@@ -2,40 +2,12 @@
 import json
 import asyncio
 from pathlib import Path
-from sqlalchemy import select, text
+from sqlalchemy import select
 from app.database import AsyncSessionLocal
 from app.models.port import PortOfEntry, LaneType
 
 
 SEED_FILE = Path(__file__).parent / "ports.json"
-
-
-async def migrate_port_ids(session, migrations: dict[str, str]) -> None:
- 
-    if not migrations:
-        return
-
-    old_ids = list(migrations.keys())
-    result = await session.execute(
-        select(PortOfEntry).where(PortOfEntry.cbp_port_id.in_(old_ids))
-    )
-    ports_to_fix = result.scalars().all()
-
-    if not ports_to_fix:
-        return
-
-    for port in ports_to_fix:
-        old_id = port.cbp_port_id
-        port.cbp_port_id = f"_tmp_{old_id}"
-        print(f"  ~ Migrating {port.name_en}: {old_id} -> tmp")
-
-    await session.flush()
-
-    for port in ports_to_fix:
-        old_id = port.cbp_port_id.replace("_tmp_", "")
-        new_id = migrations[old_id]
-        port.cbp_port_id = new_id
-        print(f"  ~ Migrated {port.name_en}: {old_id} -> {new_id}")
 
 
 async def seed():
@@ -57,10 +29,6 @@ async def seed():
             else:
                 session.add(LaneType(**lt))
                 print(f"  + Lane type: {lt['code']}")
-
-        migrations = data.get("port_id_migrations", {})
-        migrations.pop("_comment", None)
-        await migrate_port_ids(session, migrations)
 
         for port in data["ports"]:
             result = await session.execute(

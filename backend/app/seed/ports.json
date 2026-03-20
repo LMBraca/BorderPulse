@@ -7,24 +7,7 @@
     {"code": "pedestrian_ready", "name_en": "Pedestrian Ready Lane", "name_es": "Peatonal Ready Lane"},
     {"code": "commercial", "name_en": "Commercial / Trucks", "name_es": "Comercial / Camiones"}
   ],
-  "port_id_migrations": {
-    "_comment": "Maps old cbp_port_id to new cbp_port_id for existing ports that had wrong IDs",
-    "250201": "250501",
-    "250501": "250201",
-    "260301": "260101",
-    "260101": "260801",
-    "240101": "240201",
-    "240102": "202401",
-    "240103": "240203",
-    "230601": "230404",
-    "230201": "230103",
-    "230401": "230501",
-    "230301": "535501",
-    "230302": "535504",
-    "230501": "230301",
-    "230101": "230201",
-    "230701": "240301"
-  },
+  "port_id_migrations": {},
   "ports": [
     {
       "cbp_port_id": "250401",
