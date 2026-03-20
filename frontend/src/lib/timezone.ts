@@ -39,11 +39,11 @@ export function formatHourInTimezone(utcHour: number, tz: string): string {
       timeZone: tz,
     }).formatToParts(d);
     const hourPart = parts.find((p) => p.type === "hour")?.value ?? "";
-    const period = parts.find((p) => p.type === "dayPeriod")?.value?.toLowerCase() ?? "";
-    return `${hourPart}${period.charAt(0)}`;
+    const period = parts.find((p) => p.type === "dayPeriod")?.value?.toUpperCase() ?? "";
+    return `${hourPart} ${period}`;
   } catch {
     const h = utcHour % 12 || 12;
-    return utcHour < 12 ? `${h}a` : `${h}p`;
+    return utcHour < 12 ? `${h} AM` : `${h} PM`;
   }
 }
 

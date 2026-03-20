@@ -1,8 +1,8 @@
 export interface LaneWaitTime {
   laneType: string;
+  laneTypeId: number;
   laneTypeLabel: string;
   waitMinutes: number | null;
-  delayMinutes: number | null;
   lanesOpen: number | null;
   isClosed: boolean;
   updatedAt: string | null;
@@ -68,15 +68,6 @@ export interface PredictionResponse {
   bestTime: BestTimeSuggestion | null;
 }
 
-export interface HistoryPoint {
-  hour: number;
-  dayOfWeek: number;
-  medianWait: number | null;
-  p25Wait: number | null;
-  p75Wait: number | null;
-  sampleCount: number;
-}
-
 export type WaitStatus = "green" | "yellow" | "red" | "unknown" | "closed";
 
 export function getWaitStatus(minutes: number | null, isClosed?: boolean): WaitStatus {
@@ -119,4 +110,15 @@ export const STATUS_COLORS: Record<WaitStatus, string> = {
   red: "#F87171",
   unknown: "#475569",
   closed: "#475569",
+};
+
+export const MX_STATE_ABBR: Record<string, string> = {
+  "Baja California": "BC",
+  "Baja California Sur": "BCS",
+  Sonora: "Son.",
+  Chihuahua: "Chih.",
+  Coahuila: "Coah.",
+  "Nuevo Leon": "NL",
+  "Nuevo León": "NL",
+  Tamaulipas: "Tamps.",
 };

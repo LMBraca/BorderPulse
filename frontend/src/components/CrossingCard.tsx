@@ -6,9 +6,12 @@ import {
   formatTimeAgo,
   getWaitStatus,
   STATUS_COLORS,
+  MX_STATE_ABBR,
 } from "@/lib/types";
-import { Heart, ChevronRight } from "lucide-react";
+import { Heart, ChevronRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
 import { isFavorite, toggleFavorite } from "@/lib/favorites";
+import { CROSSING_VOLUMES, formatVolume } from "@/lib/volumes";
+import { getPreferredLane } from "@/lib/preferences";
 import { useState, useEffect } from "react";
 
 interface CrossingCardProps {
@@ -16,31 +19,29 @@ interface CrossingCardProps {
   onFavToggle?: () => void;
 }
 
-// Mexican state abbreviations
-const MX_STATE_ABBR: Record<string, string> = {
-  "Baja California": "BC",
-  "Baja California Sur": "BCS",
-  "Sonora": "Son.",
-  "Chihuahua": "Chih.",
-  "Coahuila": "Coah.",
-  "Nuevo León": "NL",
-  "Tamaulipas": "Tamps.",
-};
-
 // Short labels for the compact lane row
 const SHORT_LABELS: Record<string, string> = {
   standard_vehicle: "Std",
   sentri: "SENTRI",
   ready_lane: "Ready",
   pedestrian: "Ped",
+  pedestrian_ready: "Ped Ready",
   commercial: "Comm",
+};
+
+const TREND_CONFIG = {
+  rising: { icon: TrendingUp, color: "#F87171", label: "Rising" },
+  falling: { icon: TrendingDown, color: "#34D399", label: "Falling" },
+  stable: { icon: Minus, color: "#94A3B8", label: "Stable" },
 };
 
 export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProps) {
   const [fav, setFav] = useState(false);
+  const [preferredLane, setPreferredLane] = useState("standard_vehicle");
 
   useEffect(() => {
     setFav(isFavorite(crossing.id));
+    setPreferredLane(getPreferredLane());
   }, [crossing.id]);
 
   const handleFav = (e: React.MouseEvent) => {
@@ -54,8 +55,9 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
   const activeLanes = crossing.lanes.filter((l) => l.waitMinutes !== null || l.isClosed);
   const hasData = activeLanes.length > 0;
 
-  // Find the worst wait for the headline badge
-  const worstLane = activeLanes.reduce(
+  // Show preferred lane wait, fall back to worst wait if preferred not available
+  const preferred = activeLanes.find((l) => l.laneType === preferredLane && !l.isClosed && l.waitMinutes !== null);
+  const headlineLane = preferred ?? activeLanes.reduce(
     (worst, lane) => {
       if (lane.isClosed) return worst;
       if (lane.waitMinutes !== null && (worst === null || lane.waitMinutes > (worst.waitMinutes ?? 0))) {
@@ -66,8 +68,10 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
     null as typeof crossing.lanes[0] | null
   );
 
-  const worstStatus = worstLane ? getWaitStatus(worstLane.waitMinutes, worstLane.isClosed) : "unknown";
-  const worstColor = STATUS_COLORS[worstStatus];
+  const headlineStatus = headlineLane ? getWaitStatus(headlineLane.waitMinutes, headlineLane.isClosed) : "unknown";
+  const headlineColor = STATUS_COLORS[headlineStatus];
+  const volume = CROSSING_VOLUMES[crossing.name];
+  const trend = crossing.trend ? TREND_CONFIG[crossing.trend] : null;
 
   return (
     <Link href={`/crossing/${crossing.id}`} className="block group">
@@ -79,17 +83,20 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
               {crossing.name}
             </h3>
             <p className="text-xs text-slate-500 mt-0.5 truncate">
-              {crossing.cityMx}, {MX_STATE_ABBR[crossing.stateMx] ?? crossing.stateMx} → {crossing.cityUs}, {crossing.stateUs}
+              {crossing.cityMx}, {MX_STATE_ABBR[crossing.stateMx] ?? crossing.stateMx} &rarr; {crossing.cityUs}, {crossing.stateUs}
             </p>
           </div>
 
           <div className="flex items-center gap-1.5 shrink-0">
-            {worstLane && worstLane.waitMinutes !== null && (
+            {trend && (
+              <trend.icon size={14} style={{ color: trend.color }} />
+            )}
+            {headlineLane && headlineLane.waitMinutes !== null && (
               <span
                 className="text-sm font-display font-semibold tabular-nums"
-                style={{ color: worstColor }}
+                style={{ color: headlineColor }}
               >
-                {worstLane.waitMinutes} min
+                {headlineLane.waitMinutes} min
               </span>
             )}
             <button
@@ -103,6 +110,15 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
             </button>
           </div>
         </div>
+
+        {/* Volume badge */}
+        {volume && (
+          <div className="mt-1.5">
+            <span className="text-[10px] text-slate-600">
+              {formatVolume(volume.daily)}/day
+            </span>
+          </div>
+        )}
 
         {/* Lane breakdown — wrapping grid */}
         <div className="mt-auto pt-2.5 mt-2.5 border-t border-subtle">

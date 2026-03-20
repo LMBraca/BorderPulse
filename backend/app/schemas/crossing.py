@@ -5,9 +5,9 @@ from typing import Optional
 
 class LaneWaitTime(BaseModel):
     laneType: str
+    laneTypeId: int
     laneTypeLabel: str
     waitMinutes: Optional[int] = None
-    delayMinutes: Optional[int] = None
     lanesOpen: Optional[int] = None
     isClosed: bool = False
     updatedAt: Optional[datetime] = None

@@ -2,7 +2,7 @@ import structlog
 from datetime import datetime, timezone, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
-from sqlalchemy import select, and_, func, extract, desc, distinct
+from sqlalchemy import select, and_, func, extract, desc
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models.port import PortOfEntry, LaneType
@@ -100,18 +100,41 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
     lanes_result = await db.execute(select(LaneType))
     lanes = {lt.id: lt for lt in lanes_result.scalars().all()}
 
+    std_lane_id = next((lt.id for lt in lanes.values() if lt.code == "standard_vehicle"), None)
+
     # Try Redis first, fall back to DB
     live_data = await get_all_live_waits()
     if not live_data:
         logger.info("redis_empty_falling_back_to_db")
         live_data = await get_latest_from_db(db, lanes)
 
+    # Batch-query last 3 hours of standard_vehicle observations for trend computation
+    trend_cutoff = datetime.now(timezone.utc) - timedelta(hours=3)
+    trend_data: dict[int, list[Optional[int]]] = {}
+    if std_lane_id:
+        trend_result = await db.execute(
+            select(
+                WaitTimeObservation.port_id,
+                WaitTimeObservation.wait_minutes,
+            ).where(
+                and_(
+                    WaitTimeObservation.lane_type_id == std_lane_id,
+                    WaitTimeObservation.observed_at >= trend_cutoff,
+                    WaitTimeObservation.is_closed == False,
+                )
+            ).order_by(
+                WaitTimeObservation.port_id,
+                WaitTimeObservation.observed_at.desc(),
+            )
+        )
+        for row in trend_result.all():
+            trend_data.setdefault(row[0], []).append(row[1])
+
     summaries = []
     for port in ports:
         port_live = live_data.get(port.id, {})
         lane_waits = []
         last_updated = None
-        recent_waits = []
 
         for lane_id, lane in lanes.items():
             live = port_live.get(lane_id, {})
@@ -120,6 +143,7 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
 
             lane_waits.append(LaneWaitTime(
                 laneType=lane.code,
+                laneTypeId=lane_id,
                 laneTypeLabel=lane.name_en,
                 waitMinutes=wait,
                 lanesOpen=live.get("lanesOpen"),
@@ -129,8 +153,8 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
 
             if updated and (last_updated is None or updated > str(last_updated or "")):
                 last_updated = updated
-            if wait is not None:
-                recent_waits.append(wait)
+
+        trend = compute_trend(trend_data.get(port.id, []))
 
         summaries.append(CrossingSummary(
             id=port.id,
@@ -143,7 +167,7 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
             longitude=float(port.longitude),
             isActive=port.is_active,
             lanes=lane_waits,
-            trend=None,
+            trend=trend,
             lastUpdated=last_updated,
         ))
 
@@ -209,6 +233,7 @@ async def get_crossing(crossing_id: int, db: AsyncSession = Depends(get_db)):
         if live:
             lane_waits.append(LaneWaitTime(
                 laneType=lane.code,
+                laneTypeId=lane_id,
                 laneTypeLabel=lane.name_en,
                 waitMinutes=live.get("waitMinutes"),
                 lanesOpen=live.get("lanesOpen"),
@@ -218,6 +243,7 @@ async def get_crossing(crossing_id: int, db: AsyncSession = Depends(get_db)):
         else:
             lane_waits.append(LaneWaitTime(
                 laneType=lane.code,
+                laneTypeId=lane_id,
                 laneTypeLabel=lane.name_en,
             ))
 
