@@ -81,7 +81,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       </aside>
 
       {/* Main content area — offset by sidebar width on desktop */}
-      <div className="flex-1 flex flex-col min-h-dvh lg:ml-56">
+      <div className="flex-1 flex flex-col min-h-dvh lg:ml-56 min-w-0">
         {children}
       </div>
 

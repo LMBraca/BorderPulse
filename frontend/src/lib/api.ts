@@ -3,7 +3,6 @@ import type {
   CrossingDetail,
   CrossingMapMarker,
   PredictionResponse,
-  HistoryPoint,
 } from "./types";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api/v1";
@@ -43,17 +42,3 @@ export async function getPredictions(
   );
 }
 
-export async function getHistory(
-  crossingId: number,
-  laneType: string = "standard_vehicle"
-): Promise<{ portId: number; laneTypeId: number; data: HistoryPoint[] }> {
-  return fetchApi(`/crossings/${crossingId}/history?lane_type=${laneType}`);
-}
-
-export async function getHealth(): Promise<{
-  status: string;
-  redis: string;
-  ingestion: { success: boolean; record_count: number; timestamp: string } | null;
-}> {
-  return fetchApi("/health");
-}

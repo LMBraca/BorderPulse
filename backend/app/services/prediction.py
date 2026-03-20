@@ -239,32 +239,45 @@ async def compute_best_time(
     live = await get_live_wait(port_id, lane_type_id)
     current_wait = live.get("waitMinutes") if live else None
 
-    if current_wait is not None and best.predictedWait >= current_wait:
-        return BestTimeSuggestion(
-            bestHour=best.hour,
-            bestWait=best.predictedWait,
-            currentWait=current_wait,
-            message=f"Current wait ({current_wait} min) is already near the day's best. Now is a good time to cross.",
-            confidence=best.confidence,
-        )
+    h = best.hour
+    if h == 0:
+        hour_label = "12 AM"
+    elif h < 12:
+        hour_label = f"{h} AM"
+    elif h == 12:
+        hour_label = "12 PM"
+    else:
+        hour_label = f"{h - 12} PM"
 
-    hour_label = f"{best.hour}:00" if best.hour >= 10 else f"0{best.hour}:00"
+    best_wait = best.predictedWait
 
     if current_wait is not None:
-        savings = current_wait - best.predictedWait
-        if savings > 15:
-            return BestTimeSuggestion(
-                bestHour=best.hour,
-                bestWait=best.predictedWait,
-                currentWait=current_wait,
-                message=f"Typically lower around {hour_label} (~{best.predictedWait:.0f} min). Could save ~{savings:.0f} min.",
-                confidence=best.confidence,
-            )
+        savings = current_wait - best_wait
+
+        if savings > 10:
+            msg = f"Typically lower around {hour_label} (~{best_wait:.0f} min). Could save ~{savings:.0f} min vs. current {current_wait} min."
+        elif best_wait <= current_wait:
+            if best_wait > 60:
+                msg = f"Wait times stay high today. Lowest expected around {hour_label} (~{best_wait:.0f} min)."
+            elif best_wait > 30:
+                msg = f"Moderate waits expected all day. Lowest around {hour_label} (~{best_wait:.0f} min)."
+            else:
+                msg = f"Current wait ({current_wait} min) is already near today's best."
+        else:
+            if current_wait <= 15:
+                msg = f"Now is one of the better times — waits typically rise later today."
+            else:
+                msg = f"Waits expected to stay around {best_wait:.0f}+ min. Lowest around {hour_label}."
+    else:
+        if best_wait > 60:
+            msg = f"Expect long waits today. Lowest typically around {hour_label} (~{best_wait:.0f} min)."
+        else:
+            msg = f"Typically lowest around {hour_label} (~{best_wait:.0f} min)."
 
     return BestTimeSuggestion(
         bestHour=best.hour,
-        bestWait=best.predictedWait,
+        bestWait=best_wait,
         currentWait=current_wait,
-        message=f"Typically lowest around {hour_label} (~{best.predictedWait:.0f} min).",
+        message=msg,
         confidence=best.confidence,
     )

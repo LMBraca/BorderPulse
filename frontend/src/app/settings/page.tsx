@@ -1,14 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Info, Globe, Github, Coffee } from "lucide-react";
+import { Info, Globe, Github, Coffee, Car } from "lucide-react";
 import { BORDER_TIMEZONES, getUserTimezone, setUserTimezone } from "@/lib/timezone";
+import { LANE_OPTIONS, getPreferredLane, setPreferredLane, type LaneCode } from "@/lib/preferences";
 
 export default function SettingsPage() {
   const [tz, setTz] = useState("America/Tijuana");
+  const [lane, setLane] = useState<LaneCode>("standard_vehicle");
 
   useEffect(() => {
     setTz(getUserTimezone());
+    setLane(getPreferredLane());
   }, []);
 
   const handleTzChange = (value: string) => {
@@ -45,6 +48,34 @@ export default function SettingsPage() {
               {BORDER_TIMEZONES.map((t) => (
                 <option key={t.value} value={t.value} className="bg-navy-800">
                   {t.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Preferred crossing type */}
+          <div className="rounded-xl bg-card border border-subtle p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <Car size={18} className="text-slate-400" />
+              <div>
+                <h3 className="font-display font-semibold text-sm text-white">Crossing type</h3>
+                <p className="text-xs text-slate-600 mt-0.5">
+                  Wait time shown on crossing cards
+                </p>
+              </div>
+            </div>
+            <select
+              value={lane}
+              onChange={(e) => {
+                const v = e.target.value as LaneCode;
+                setLane(v);
+                setPreferredLane(v);
+              }}
+              className="w-full px-3 py-2 rounded-lg text-sm bg-white/[0.04] border border-subtle text-white focus:outline-none focus:border-slate-600 transition-colors"
+            >
+              {LANE_OPTIONS.map((o) => (
+                <option key={o.value} value={o.value} className="bg-navy-800">
+                  {o.label}
                 </option>
               ))}
             </select>
