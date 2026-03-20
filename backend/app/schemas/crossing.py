@@ -19,6 +19,7 @@ class CrossingSummary(BaseModel):
     cityUs: str
     cityMx: str
     stateUs: str
+    stateMx: str
     latitude: float
     longitude: float
     isActive: bool

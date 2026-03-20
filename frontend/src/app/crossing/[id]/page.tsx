@@ -11,6 +11,16 @@ import type { CrossingDetail, PredictionResponse } from "@/lib/types";
 import { ArrowLeft, Heart, Clock, Sparkles } from "lucide-react";
 import { getUserTimezone } from "@/lib/timezone";
 
+const MX_STATE_ABBR: Record<string, string> = {
+  "Baja California": "BC",
+  "Baja California Sur": "BCS",
+  "Sonora": "Son.",
+  "Chihuahua": "Chih.",
+  "Coahuila": "Coah.",
+  "Nuevo León": "NL",
+  "Tamaulipas": "Tamps.",
+};
+
 type LaneTab = "standard_vehicle" | "sentri" | "ready_lane" | "pedestrian" | "commercial";
 
 const LANE_TAB_LABELS: Record<LaneTab, string> = {
@@ -116,7 +126,7 @@ export default function CrossingDetailPage() {
               {crossing.name}
             </h1>
             <p className="text-xs text-slate-500">
-              {crossing.cityUs}, {crossing.stateUs} → {crossing.cityMx}
+              {crossing.cityMx}, {MX_STATE_ABBR[crossing.stateMx] ?? crossing.stateMx} → {crossing.cityUs}, {crossing.stateUs}
             </p>
           </div>
           <button
