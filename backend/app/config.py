@@ -20,7 +20,7 @@ class Settings(BaseSettings):
     api_prefix: str = "/api/v1"
     cors_origins: str = "http://localhost:3000"
 
-    model_config = {"env_prefix": "BP_", "env_file": ".env"}
+    model_config = {"env_prefix": "BP_", "env_file": ".env", "extra": "ignore"}
 
 
 @lru_cache

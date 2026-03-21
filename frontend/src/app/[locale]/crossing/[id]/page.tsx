@@ -11,9 +11,17 @@ import WaitTimeChart from "@/components/WaitTimeChart";
 import WeatherWidget from "@/components/WeatherWidget";
 import ExchangeRate from "@/components/ExchangeRate";
 import { isFavorite, toggleFavorite } from "@/lib/favorites";
+import dynamic from "next/dynamic";
 import type { CrossingDetail, PredictionResponse } from "@/lib/types";
 import { ArrowLeft, Heart } from "lucide-react";
 import { getUserTimezone } from "@/lib/timezone";
+
+const TrafficMap = dynamic(() => import("@/components/TrafficMap"), {
+  ssr: false,
+  loading: () => (
+    <div className="w-full h-[300px] sm:aspect-square sm:h-auto bg-navy-900/50 animate-pulse rounded-xl" />
+  ),
+});
 
 type LaneTab =
   | "standard_vehicle"
@@ -217,7 +225,7 @@ export default function CrossingDetailPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="grid grid-cols-2 gap-3 mb-3">
             <div className="rounded-xl bg-card border border-subtle p-3">
               <p className="text-[10px] text-slate-600 uppercase tracking-wider font-medium mb-1.5">
                 {t("weather")}
@@ -230,6 +238,14 @@ export default function CrossingDetailPage() {
             <div className="rounded-xl bg-card border border-subtle p-3 overflow-hidden">
               <ExchangeRate />
             </div>
+          </div>
+
+          {/* Live traffic map */}
+          <div className="rounded-xl border border-subtle overflow-hidden mb-3 h-[300px] sm:aspect-square sm:h-auto">
+            <TrafficMap
+              latitude={crossing.latitude}
+              longitude={crossing.longitude}
+            />
           </div>
         </div>
       </main>
