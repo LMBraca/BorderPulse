@@ -1,0 +1,152 @@
+{
+  "common": {
+    "appName": "BorderPulse",
+    "tagline": "Tiempos de espera en la frontera",
+    "refresh": "Actualizar",
+    "retry": "Reintentar",
+    "noData": "Sin datos disponibles",
+    "min": "min",
+    "closed": "Cerrado",
+    "na": "N/D",
+    "noWait": "Sin espera",
+    "justNow": "Justo ahora",
+    "minsAgo": "hace {mins}m",
+    "hoursAgo": "hace {hrs}h",
+    "stale": "Desactualizado",
+    "perDay": "/dia"
+  },
+  "nav": {
+    "home": "Inicio",
+    "map": "Mapa",
+    "saved": "Guardados",
+    "settings": "Ajustes",
+    "sourceOnGithub": "Codigo en GitHub",
+    "buyMeACoffee": "Invitame un cafe"
+  },
+  "home": {
+    "allCrossings": "Todos los cruces",
+    "searchPlaceholder": "Buscar cruces...",
+    "favorites": "Favoritos",
+    "noResults": "Ningun cruce coincide con \"{query}\"",
+    "loadError": "No se pudieron cargar los cruces",
+    "states": {
+      "CA": "California",
+      "AZ": "Arizona",
+      "TX": "Texas"
+    }
+  },
+  "crossing": {
+    "notFound": "Cruce no encontrado",
+    "goBack": "Volver",
+    "weather": "Clima",
+    "lanesOpen": "{count} {count, plural, one {carril} other {carriles}} abiertos"
+  },
+  "lanes": {
+    "standard_vehicle": "Estandar",
+    "sentri": "SENTRI",
+    "ready_lane": "Ready Lane",
+    "pedestrian": "Peatonal",
+    "pedestrian_ready": "Peat. Ready",
+    "commercial": "Comercial",
+    "short": {
+      "standard_vehicle": "Std",
+      "sentri": "SENTRI",
+      "ready_lane": "Ready",
+      "pedestrian": "Peat",
+      "pedestrian_ready": "Peat Ready",
+      "commercial": "Com"
+    },
+    "full": {
+      "standard_vehicle": "Vehiculo estandar",
+      "sentri": "SENTRI",
+      "ready_lane": "Ready Lane",
+      "pedestrian": "Peatonal",
+      "pedestrian_ready": "Peatonal Ready Lane",
+      "commercial": "Comercial"
+    }
+  },
+  "trends": {
+    "rising": "Subiendo",
+    "falling": "Bajando",
+    "stable": "Estable"
+  },
+  "chart": {
+    "notEnoughData": "Aun no hay suficientes datos",
+    "range": "Rango: {min}–{max} min",
+    "forecast": "Pronostico",
+    "actual": "Real",
+    "forecastLegend": "Pronostico (prom. 90d)",
+    "now": "Ahora",
+    "reliable": "Confiable",
+    "moderate": "Moderado",
+    "limitedData": "Datos limitados",
+    "lowConfidenceNote": "Basado en datos limitados — tomar como estimacion aproximada"
+  },
+  "weather": {
+    "0": "Despejado",
+    "1": "Mayormente despejado",
+    "2": "Parcialmente nublado",
+    "3": "Nublado",
+    "45": "Niebla",
+    "48": "Niebla helada",
+    "51": "Llovizna ligera",
+    "53": "Llovizna",
+    "55": "Llovizna fuerte",
+    "56": "Llovizna helada",
+    "57": "Llovizna helada fuerte",
+    "61": "Lluvia ligera",
+    "63": "Lluvia",
+    "65": "Lluvia fuerte",
+    "66": "Lluvia helada",
+    "67": "Lluvia helada fuerte",
+    "71": "Nevada ligera",
+    "73": "Nevada",
+    "75": "Nevada fuerte",
+    "77": "Granizo fino",
+    "80": "Chubascos ligeros",
+    "81": "Chubascos",
+    "82": "Chubascos fuertes",
+    "85": "Chubascos de nieve ligeros",
+    "86": "Chubascos de nieve fuertes",
+    "95": "Tormenta electrica",
+    "96": "Tormenta con granizo",
+    "99": "Tormenta severa",
+    "unknown": "Desconocido"
+  },
+  "exchange": {
+    "label": "USD / MXN",
+    "today": "hoy"
+  },
+  "favorites": {
+    "title": "Cruces guardados",
+    "subtitle": "Tus cruces fronterizos frecuentes",
+    "empty": "Sin favoritos aun",
+    "emptyHint": "Toca el icono de corazon en cualquier cruce para guardarlo aqui",
+    "browseCrossings": "Ver cruces"
+  },
+  "map": {
+    "title": "Mapa fronterizo",
+    "tapHint": "Toca un cruce para ver detalles",
+    "loadError": "No se pudo cargar el mapa",
+    "noData": "Sin datos",
+    "legendGreen": "< 20 min",
+    "legendYellow": "20–45 min",
+    "legendRed": "> 45 min"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "timezone": "Zona horaria",
+    "timezoneDesc": "Usado para predicciones y \"mejor hora para cruzar\"",
+    "crossingType": "Tipo de cruce",
+    "crossingTypeDesc": "Tiempo de espera mostrado en las tarjetas",
+    "language": "Idioma",
+    "languageDesc": "Idioma de la aplicacion y prefijo de URL",
+    "about": "Acerca de",
+    "aboutText1": "Tiempos de espera en la frontera EE.UU.-Mexico en tiempo real y predicciones. Datos de la API de CBP, actualizados aproximadamente cada 15 minutos.",
+    "aboutText2": "Predicciones basadas en patrones historicos por dia de la semana y hora del dia. Mejoran conforme se acumulan datos."
+  },
+  "metadata": {
+    "title": "BorderPulse — Tiempos de espera en la frontera",
+    "description": "Tiempos de espera en cruces fronterizos EE.UU.-Mexico en tiempo real, predicciones y sugerencias."
+  }
+}

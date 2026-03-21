@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import type { CrossingMapMarker } from "@/lib/types";
 import { STATUS_COLORS } from "@/lib/types";
 import { getMapMarkers } from "@/lib/api";
@@ -15,6 +16,8 @@ interface BorderMapProps {
 }
 
 function MarkerPopup({ marker }: { marker: CrossingMapMarker }) {
+  const t = useTranslations("map");
+  const tc = useTranslations("common");
   const color = STATUS_COLORS[marker.status];
   return (
     <div className="text-center min-w-[120px]">
@@ -24,19 +27,20 @@ function MarkerPopup({ marker }: { marker: CrossingMapMarker }) {
           <span className="text-lg font-bold font-display tabular-nums" style={{ color }}>
             {marker.worstWait}
           </span>
-          <span className="text-xs text-slate-400 ml-1">min</span>
+          <span className="text-xs text-slate-400 ml-1">{tc("min")}</span>
         </div>
       ) : (
-        <div className="text-xs text-slate-500 mt-1">No data</div>
+        <div className="text-xs text-slate-500 mt-1">{t("noData")}</div>
       )}
     </div>
   );
 }
 
 export default function BorderMap({ onMarkerClick }: BorderMapProps) {
+  const t = useTranslations("map");
   const [markers, setMarkers] = useState<CrossingMapMarker[]>([]);
   const [leafletReady, setLeafletReady] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
     import("react-leaflet").then((rl) => {
@@ -51,7 +55,7 @@ export default function BorderMap({ onMarkerClick }: BorderMapProps) {
   useEffect(() => {
     getMapMarkers()
       .then(setMarkers)
-      .catch(() => setError("Could not load map data"));
+      .catch(() => setError(true));
 
     const interval = setInterval(() => {
       getMapMarkers().then(setMarkers).catch(() => {});
@@ -62,7 +66,7 @@ export default function BorderMap({ onMarkerClick }: BorderMapProps) {
   if (error) {
     return (
       <div className="flex items-center justify-center h-full text-slate-600 text-sm">
-        {error}
+        {t("loadError")}
       </div>
     );
   }

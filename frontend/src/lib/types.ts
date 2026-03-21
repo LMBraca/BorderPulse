@@ -70,7 +70,10 @@ export interface PredictionResponse {
 
 export type WaitStatus = "green" | "yellow" | "red" | "unknown" | "closed";
 
-export function getWaitStatus(minutes: number | null, isClosed?: boolean): WaitStatus {
+export function getWaitStatus(
+  minutes: number | null,
+  isClosed?: boolean
+): WaitStatus {
   if (isClosed) return "closed";
   if (minutes === null) return "unknown";
   if (minutes <= 20) return "green";
@@ -78,7 +81,37 @@ export function getWaitStatus(minutes: number | null, isClosed?: boolean): WaitS
   return "red";
 }
 
-export function formatWait(minutes: number | null, isClosed?: boolean): string {
+export interface TranslatableString {
+  key: string;
+  values?: Record<string, string | number>;
+}
+
+export function formatWaitI18n(
+  minutes: number | null,
+  isClosed?: boolean
+): TranslatableString {
+  if (isClosed) return { key: "closed" };
+  if (minutes === null) return { key: "na" };
+  if (minutes === 0) return { key: "noWait" };
+  return { key: "minValue", values: { mins: minutes } };
+}
+
+export function formatTimeAgoI18n(
+  dateStr: string | null
+): TranslatableString {
+  if (!dateStr) return { key: "noData" };
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return { key: "justNow" };
+  if (mins < 60) return { key: "minsAgo", values: { mins } };
+  const hrs = Math.floor(mins / 60);
+  return { key: "hoursAgo", values: { hrs } };
+}
+
+export function formatWait(
+  minutes: number | null,
+  isClosed?: boolean
+): string {
   if (isClosed) return "Closed";
   if (minutes === null) return "N/A";
   if (minutes === 0) return "No wait";

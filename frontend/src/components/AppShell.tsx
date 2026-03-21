@@ -1,17 +1,22 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { Link, usePathname } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { Home, Map, Heart, Settings, Radio, Github, Coffee } from "lucide-react";
 
-const NAV_ITEMS = [
-  { href: "/", icon: Home, label: "Home" },
-  { href: "/map", icon: Map, label: "Map" },
-  { href: "/favorites", icon: Heart, label: "Saved" },
-  { href: "/settings", icon: Settings, label: "Settings" },
-];
+const NAV_KEYS = [
+  { href: "/", icon: Home, tKey: "home" },
+  { href: "/map", icon: Map, tKey: "map" },
+  { href: "/favorites", icon: Heart, tKey: "saved" },
+  { href: "/settings", icon: Settings, tKey: "settings" },
+] as const;
 
-function NavLink({ href, icon: Icon, label, isActive }: {
+function NavLink({
+  href,
+  icon: Icon,
+  label,
+  isActive,
+}: {
   href: string;
   icon: React.ElementType;
   label: string;
@@ -34,6 +39,7 @@ function NavLink({ href, icon: Icon, label, isActive }: {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const t = useTranslations("nav");
 
   const isActive = (href: string) =>
     href === "/" ? pathname === "/" : pathname.startsWith(href);
@@ -49,33 +55,41 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               BorderPulse
             </span>
           </Link>
-          <p className="text-[10px] text-slate-600 mt-1 pl-[26px]">Live border wait times</p>
+          <p className="text-[10px] text-slate-600 mt-1 pl-[26px]">
+            {t("home") === "Inicio" ? "Tiempos de espera en la frontera" : "Live border wait times"}
+          </p>
         </div>
 
         <nav className="flex-1 px-3 space-y-0.5">
-          {NAV_ITEMS.map((item) => (
-            <NavLink key={item.href} {...item} isActive={isActive(item.href)} />
+          {NAV_KEYS.map((item) => (
+            <NavLink
+              key={item.href}
+              href={item.href}
+              icon={item.icon}
+              label={t(item.tKey)}
+              isActive={isActive(item.href)}
+            />
           ))}
         </nav>
 
         <div className="px-4 py-4 border-t border-subtle space-y-2">
           <a
-            href="https://github.com/yourusername/borderpulse"
+            href="https://github.com/LMBraca/BorderPulse"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors"
           >
             <Github size={14} />
-            Source on GitHub
+            {t("sourceOnGithub")}
           </a>
           <a
-            href="https://buymeacoffee.com/yourusername"
+            href="https://buymeacoffee.com/lmbraca"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center gap-2 text-xs text-slate-600 hover:text-slate-400 transition-colors"
           >
             <Coffee size={14} />
-            Buy me a coffee
+            {t("buyMeACoffee")}
           </a>
         </div>
       </aside>
@@ -88,7 +102,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       {/* Mobile bottom nav */}
       <nav className="lg:hidden fixed bottom-0 left-0 right-0 z-50 px-4 pb-4 pt-2">
         <div className="flex items-center justify-around rounded-2xl border border-subtle bg-navy-800/90 backdrop-blur-xl px-2 py-1.5 shadow-lg shadow-black/30">
-          {NAV_ITEMS.map(({ href, icon: Icon, label }) => (
+          {NAV_KEYS.map(({ href, icon: Icon, tKey }) => (
             <Link
               key={href}
               href={href}
@@ -99,7 +113,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               }`}
             >
               <Icon size={19} strokeWidth={isActive(href) ? 2.2 : 1.5} />
-              <span className="text-[10px] font-display font-medium">{label}</span>
+              <span className="text-[10px] font-display font-medium">
+                {t(tKey)}
+              </span>
             </Link>
           ))}
         </div>

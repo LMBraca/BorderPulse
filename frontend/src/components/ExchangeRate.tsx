@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 const CACHE_KEY = "bp_exchange_rate";
 const CACHE_TTL = 60 * 60 * 1000;
@@ -27,6 +28,7 @@ function setCache(rate: number, prevRate: number | null) {
 }
 
 export default function ExchangeRate() {
+  const t = useTranslations("exchange");
   const [rate, setRate] = useState<number | null>(null);
   const [prevRate, setPrevRate] = useState<number | null>(null);
 
@@ -70,7 +72,7 @@ export default function ExchangeRate() {
   return (
     <div>
       <p className="text-[10px] text-slate-600 uppercase tracking-wider font-medium mb-1.5">
-        USD / MXN
+        {t("label")}
       </p>
       <p className="font-display font-bold text-lg text-white leading-tight">
         ${rate.toFixed(2)}
@@ -82,7 +84,7 @@ export default function ExchangeRate() {
           }`}
         >
           {isUp ? "+" : ""}
-          {change.toFixed(2)} today
+          {change.toFixed(2)} {t("today")}
         </p>
       )}
     </div>

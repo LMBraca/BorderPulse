@@ -1,0 +1,152 @@
+{
+  "common": {
+    "appName": "BorderPulse",
+    "tagline": "Live border wait times",
+    "refresh": "Refresh",
+    "retry": "Retry",
+    "noData": "No data available",
+    "min": "min",
+    "closed": "Closed",
+    "na": "N/A",
+    "noWait": "No wait",
+    "justNow": "Just now",
+    "minsAgo": "{mins}m ago",
+    "hoursAgo": "{hrs}h ago",
+    "stale": "Stale",
+    "perDay": "/day"
+  },
+  "nav": {
+    "home": "Home",
+    "map": "Map",
+    "saved": "Saved",
+    "settings": "Settings",
+    "sourceOnGithub": "Source on GitHub",
+    "buyMeACoffee": "Buy me a coffee"
+  },
+  "home": {
+    "allCrossings": "All Crossings",
+    "searchPlaceholder": "Search crossings...",
+    "favorites": "Favorites",
+    "noResults": "No crossings match \"{query}\"",
+    "loadError": "Could not load crossing data",
+    "states": {
+      "CA": "California",
+      "AZ": "Arizona",
+      "TX": "Texas"
+    }
+  },
+  "crossing": {
+    "notFound": "Crossing not found",
+    "goBack": "Go back",
+    "weather": "Weather",
+    "lanesOpen": "{count} {count, plural, one {lane} other {lanes}} open"
+  },
+  "lanes": {
+    "standard_vehicle": "Standard",
+    "sentri": "SENTRI",
+    "ready_lane": "Ready Lane",
+    "pedestrian": "Pedestrian",
+    "pedestrian_ready": "Ped. Ready",
+    "commercial": "Commercial",
+    "short": {
+      "standard_vehicle": "Std",
+      "sentri": "SENTRI",
+      "ready_lane": "Ready",
+      "pedestrian": "Ped",
+      "pedestrian_ready": "Ped Ready",
+      "commercial": "Comm"
+    },
+    "full": {
+      "standard_vehicle": "Standard Vehicle",
+      "sentri": "SENTRI",
+      "ready_lane": "Ready Lane",
+      "pedestrian": "Pedestrian",
+      "pedestrian_ready": "Ped. Ready Lane",
+      "commercial": "Commercial"
+    }
+  },
+  "trends": {
+    "rising": "Rising",
+    "falling": "Falling",
+    "stable": "Stable"
+  },
+  "chart": {
+    "notEnoughData": "Not enough data yet",
+    "range": "Range: {min}–{max} min",
+    "forecast": "Forecast",
+    "actual": "Actual",
+    "forecastLegend": "Forecast (90d avg)",
+    "now": "Now",
+    "reliable": "Reliable",
+    "moderate": "Moderate",
+    "limitedData": "Limited data",
+    "lowConfidenceNote": "Based on limited data — treat as a rough estimate"
+  },
+  "weather": {
+    "0": "Clear",
+    "1": "Mostly clear",
+    "2": "Partly cloudy",
+    "3": "Overcast",
+    "45": "Fog",
+    "48": "Rime fog",
+    "51": "Light drizzle",
+    "53": "Drizzle",
+    "55": "Heavy drizzle",
+    "56": "Freezing drizzle",
+    "57": "Heavy freezing drizzle",
+    "61": "Light rain",
+    "63": "Rain",
+    "65": "Heavy rain",
+    "66": "Freezing rain",
+    "67": "Heavy freezing rain",
+    "71": "Light snow",
+    "73": "Snow",
+    "75": "Heavy snow",
+    "77": "Snow grains",
+    "80": "Light showers",
+    "81": "Showers",
+    "82": "Heavy showers",
+    "85": "Light snow showers",
+    "86": "Heavy snow showers",
+    "95": "Thunderstorm",
+    "96": "Thunderstorm w/ hail",
+    "99": "Severe thunderstorm",
+    "unknown": "Unknown"
+  },
+  "exchange": {
+    "label": "USD / MXN",
+    "today": "today"
+  },
+  "favorites": {
+    "title": "Saved Crossings",
+    "subtitle": "Your frequently used border crossings",
+    "empty": "No favorites yet",
+    "emptyHint": "Tap the heart icon on any crossing to save it here",
+    "browseCrossings": "Browse Crossings"
+  },
+  "map": {
+    "title": "Border Map",
+    "tapHint": "Tap a crossing for details",
+    "loadError": "Could not load map data",
+    "noData": "No data",
+    "legendGreen": "< 20 min",
+    "legendYellow": "20–45 min",
+    "legendRed": "> 45 min"
+  },
+  "settings": {
+    "title": "Settings",
+    "timezone": "Timezone",
+    "timezoneDesc": "Used for prediction times and \"best time to cross\"",
+    "crossingType": "Crossing type",
+    "crossingTypeDesc": "Wait time shown on crossing cards",
+    "language": "Language",
+    "languageDesc": "App language and URL prefix",
+    "about": "About",
+    "aboutText1": "Real-time US-Mexico border wait times and predictions. Data from the CBP Border Wait Times API, updated roughly every 15 minutes.",
+    "aboutText2": "Predictions based on historical day-of-week and hour-of-day patterns. They improve as data accumulates."
+  },
+  "metadata": {
+    "title": "BorderPulse — Live Border Wait Times",
+    "description": "Real-time US-Mexico border crossing wait times, predictions, and best-time suggestions."
+  }
+}

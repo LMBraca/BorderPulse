@@ -1,21 +1,21 @@
 const PREFERRED_LANE_KEY = "borderpulse_preferred_lane";
 
-export const LANE_OPTIONS = [
-  { value: "standard_vehicle", label: "Standard Vehicle" },
-  { value: "sentri", label: "SENTRI" },
-  { value: "ready_lane", label: "Ready Lane" },
-  { value: "pedestrian", label: "Pedestrian" },
-  { value: "pedestrian_ready", label: "Ped. Ready Lane" },
-  { value: "commercial", label: "Commercial" },
+export const LANE_CODES = [
+  "standard_vehicle",
+  "sentri",
+  "ready_lane",
+  "pedestrian",
+  "pedestrian_ready",
+  "commercial",
 ] as const;
 
-export type LaneCode = (typeof LANE_OPTIONS)[number]["value"];
+export type LaneCode = (typeof LANE_CODES)[number];
 
 export function getPreferredLane(): LaneCode {
   if (typeof window === "undefined") return "standard_vehicle";
   try {
     const v = localStorage.getItem(PREFERRED_LANE_KEY);
-    if (v && LANE_OPTIONS.some((o) => o.value === v)) return v as LaneCode;
+    if (v && LANE_CODES.includes(v as LaneCode)) return v as LaneCode;
   } catch {}
   return "standard_vehicle";
 }
