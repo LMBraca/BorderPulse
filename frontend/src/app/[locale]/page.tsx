@@ -64,16 +64,20 @@ export default function HomePage() {
   const others = filtered.filter((c) => !favIds.includes(c.id));
 
   const grouped = others.reduce<Record<string, CrossingSummary[]>>((acc, c) => {
-    const key = c.stateUs || "Other";
+    const key = (c.stateUs || "Other").toUpperCase();
     if (!acc[key]) acc[key] = [];
     acc[key].push(c);
     return acc;
   }, {});
 
-  const stateOrder = ["CA", "AZ", "TX"];
-  const sortedStates = Object.keys(grouped).sort(
-    (a, b) => (stateOrder.indexOf(a) ?? 99) - (stateOrder.indexOf(b) ?? 99)
-  );
+  const stateOrder = ["CA", "AZ", "NM", "TX"];
+  const sortedStates = Object.keys(grouped).sort((a, b) => {
+    const aIdx = stateOrder.indexOf(a);
+    const bIdx = stateOrder.indexOf(b);
+    const aRank = aIdx === -1 ? 99 : aIdx;
+    const bRank = bIdx === -1 ? 99 : bIdx;
+    return aRank - bRank;
+  });
 
   return (
     <div className="flex flex-col min-h-dvh pb-24 lg:pb-0">
@@ -160,7 +164,7 @@ export default function HomePage() {
               {sortedStates.map((state) => (
                 <section key={state} className="mt-5">
                   <h2 className="font-display font-semibold text-[11px] text-slate-500 uppercase tracking-widest mb-2 pl-1">
-                    {t(`states.${state}`)}
+                    {t(`states.${state}`) || state}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-1.5">
                     {grouped[state].map((c) => (
