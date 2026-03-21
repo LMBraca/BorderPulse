@@ -9,6 +9,7 @@ import {
   ResponsiveContainer,
   ReferenceLine,
 } from "recharts";
+import { useTranslations } from "next-intl";
 import type { HourlyPrediction, BestTimeSuggestion } from "@/lib/types";
 import { getCurrentHourInTimezone } from "@/lib/timezone";
 
@@ -50,7 +51,7 @@ function formatHour(hour: number): string {
   return `${hour - 12} PM`;
 }
 
-const CustomTooltip = ({ active, payload }: any) => {
+function ChartTooltip({ active, payload, t }: any) {
   if (!active || !payload?.length) return null;
   const data = payload[0]?.payload as ChartPoint | undefined;
   if (!data) return null;
@@ -67,18 +68,18 @@ const CustomTooltip = ({ active, payload }: any) => {
       </div>
       {isPrediction && data.p25 !== null && data.p75 !== null && (
         <div className="text-xs text-slate-400">
-          Range: {data.p25}–{data.p75} min
+          {t("range", { min: data.p25, max: data.p75 })}
         </div>
       )}
       <div className="text-xs text-slate-600 mt-0.5">
-        {isPrediction ? "Forecast" : "Actual"}
+        {isPrediction ? t("forecast") : t("actual")}
         {isPrediction && data.confidence && ` · ${
-          data.confidence === "high" ? "Reliable" : data.confidence === "medium" ? "Moderate" : "Limited data"
+          data.confidence === "high" ? t("reliable") : data.confidence === "medium" ? t("moderate") : t("limitedData")
         }`}
       </div>
     </div>
   );
-};
+}
 
 export default function WaitTimeChart({
   recentHistory,
@@ -87,11 +88,11 @@ export default function WaitTimeChart({
   laneTypeId,
   timezone,
 }: WaitTimeChartProps) {
+  const t = useTranslations("chart");
   const now = Date.now();
   const sixHoursAgo = now - 6 * 60 * 60 * 1000;
   const currentHour = getCurrentHourInTimezone(timezone);
 
-  // --- Build actual data points from recent history ---
   const actualPoints: ChartPoint[] = recentHistory
     .filter((d) => {
       if (d.waitMinutes === null) return false;
@@ -112,7 +113,6 @@ export default function WaitTimeChart({
       };
     });
 
-  // --- Build prediction points for future hours ---
   const today = new Date();
   const futureHours = predictions.filter((h) => h.hour >= currentHour);
   const predictionPoints: ChartPoint[] = futureHours.map((h) => {
@@ -128,16 +128,14 @@ export default function WaitTimeChart({
     };
   });
 
-  // --- Bridge point: connect actual to predicted ---
-  // Add a "now" point using the last actual value as both actual and predicted start
   const bridgePoints: ChartPoint[] = [];
   if (actualPoints.length > 0 && predictionPoints.length > 0) {
     const lastActual = actualPoints[actualPoints.length - 1];
     bridgePoints.push({
       time: now,
-      label: "Now",
+      label: t("now"),
       actual: lastActual.actual,
-      predicted: lastActual.actual, // seamless connection
+      predicted: lastActual.actual,
       p25: null,
       p75: null,
     });
@@ -148,21 +146,17 @@ export default function WaitTimeChart({
   if (allPoints.length < 2) {
     return (
       <div className="flex items-center justify-center h-48 text-slate-600 text-sm">
-        Not enough data yet
+        {t("notEnoughData")}
       </div>
     );
   }
 
-  // Y-axis domain
   const allWaits = allPoints.map((p) => p.actual ?? p.predicted ?? 0);
   const minWait = Math.min(...allWaits);
   const maxWait = Math.max(...allWaits);
   const yPad = Math.max(2, (maxWait - minWait) * 0.15);
 
-  // Find "Now" index for reference line
-  const nowLabel = bridgePoints.length > 0 ? "Now" : undefined;
-
-  // X-axis tick interval — aim for ~6 labels
+  const nowLabel = bridgePoints.length > 0 ? t("now") : undefined;
   const tickInterval = Math.max(1, Math.floor(allPoints.length / 6));
 
   return (
@@ -171,9 +165,7 @@ export default function WaitTimeChart({
         <div className="rounded-lg px-3 py-2.5 mb-3 bg-white/[0.03] border border-subtle overflow-hidden">
           <p className="text-sm text-slate-300 break-words">{bestTime.message}</p>
           {bestTime.confidence === "low" && (
-            <p className="text-xs text-slate-600 mt-1">
-              Based on limited data — treat as a rough estimate
-            </p>
+            <p className="text-xs text-slate-600 mt-1">{t("lowConfidenceNote")}</p>
           )}
         </div>
       )}
@@ -206,9 +198,8 @@ export default function WaitTimeChart({
               axisLine={false}
               unit="m"
             />
-            <Tooltip content={<CustomTooltip />} />
+            <Tooltip content={<ChartTooltip t={t} />} />
 
-            {/* Actual observations — solid blue */}
             <Area
               dataKey="actual"
               stroke="#60A5FA"
@@ -220,7 +211,6 @@ export default function WaitTimeChart({
               connectNulls={false}
             />
 
-            {/* Predictions — dashed gray */}
             <Area
               dataKey="predicted"
               stroke="#94A3B8"
@@ -233,14 +223,13 @@ export default function WaitTimeChart({
               connectNulls={false}
             />
 
-            {/* "Now" divider */}
             {nowLabel && (
               <ReferenceLine
                 x={nowLabel}
                 stroke="rgba(255,255,255,0.15)"
                 strokeDasharray="3 3"
                 label={{
-                  value: "Now",
+                  value: t("now"),
                   position: "top",
                   fill: "#64748B",
                   fontSize: 10,
@@ -248,7 +237,6 @@ export default function WaitTimeChart({
               />
             )}
 
-            {/* Best time marker */}
             {bestTime?.bestHour != null && bestTime.bestHour > currentHour && (
               <ReferenceLine
                 x={formatHour(bestTime.bestHour)}
@@ -261,15 +249,14 @@ export default function WaitTimeChart({
         </ResponsiveContainer>
       </div>
 
-      {/* Legend */}
       <div className="flex items-center gap-3 mt-2">
         <div className="flex items-center gap-1">
           <div className="w-3 h-0.5 bg-blue-400 rounded-full shrink-0" />
-          <span className="text-[10px] text-slate-600">Actual</span>
+          <span className="text-[10px] text-slate-600">{t("actual")}</span>
         </div>
         <div className="flex items-center gap-1">
           <div className="w-3 h-0.5 bg-slate-400 rounded-full shrink-0" style={{ borderTop: "1px dashed #94A3B8" }} />
-          <span className="text-[10px] text-slate-600">Forecast (90d avg)</span>
+          <span className="text-[10px] text-slate-600">{t("forecastLegend")}</span>
         </div>
       </div>
     </div>

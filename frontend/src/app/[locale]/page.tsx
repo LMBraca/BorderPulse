@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import CrossingCard from "@/components/CrossingCard";
 import FreshnessIndicator from "@/components/FreshnessIndicator";
 import { getCrossings } from "@/lib/api";
@@ -9,9 +10,12 @@ import type { CrossingSummary } from "@/lib/types";
 import { Search, X, RefreshCw } from "lucide-react";
 
 export default function HomePage() {
+  const t = useTranslations("home");
+  const tc = useTranslations("common");
+
   const [crossings, setCrossings] = useState<CrossingSummary[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState(false);
   const [search, setSearch] = useState("");
   const [favIds, setFavIds] = useState<number[]>([]);
   const [lastFetch, setLastFetch] = useState<string | null>(null);
@@ -22,9 +26,9 @@ export default function HomePage() {
       const data = await getCrossings();
       setCrossings(data);
       setLastFetch(new Date().toISOString());
-      setError(null);
+      setError(false);
     } catch {
-      setError("Could not load crossing data");
+      setError(true);
     } finally {
       setLoading(false);
     }
@@ -60,31 +64,32 @@ export default function HomePage() {
   const others = filtered.filter((c) => !favIds.includes(c.id));
 
   const grouped = others.reduce<Record<string, CrossingSummary[]>>((acc, c) => {
-    const key = c.stateUs || "Other";
+    const key = (c.stateUs || "Other").toUpperCase();
     if (!acc[key]) acc[key] = [];
     acc[key].push(c);
     return acc;
   }, {});
 
-  const stateOrder = ["CA", "AZ", "TX"];
-  const sortedStates = Object.keys(grouped).sort(
-    (a, b) => (stateOrder.indexOf(a) ?? 99) - (stateOrder.indexOf(b) ?? 99)
-  );
-  // TODO: get these from the API instead of hardcoding
-  const stateNames: Record<string, string> = { CA: "California", AZ: "Arizona", TX: "Texas" };
+  const stateOrder = ["CA", "AZ", "NM", "TX"];
+  const sortedStates = Object.keys(grouped).sort((a, b) => {
+    const aIdx = stateOrder.indexOf(a);
+    const bIdx = stateOrder.indexOf(b);
+    const aRank = aIdx === -1 ? 99 : aIdx;
+    const bRank = bIdx === -1 ? 99 : bIdx;
+    return aRank - bRank;
+  });
 
   return (
     <div className="flex flex-col min-h-dvh pb-24 lg:pb-0">
-      {/* Header */}
       <header className="sticky top-0 z-40 bg-navy-950/95 backdrop-blur-lg border-b border-subtle px-4 lg:px-8 pt-4 pb-3">
         <div className="max-w-5xl mx-auto">
           <div className="flex items-center justify-between mb-3">
             <div>
               <h1 className="font-display font-bold text-lg text-white tracking-tight lg:hidden">
-                BorderPulse
+                {tc("appName")}
               </h1>
               <h1 className="font-display font-bold text-lg text-white tracking-tight hidden lg:block">
-                All Crossings
+                {t("allCrossings")}
               </h1>
               <FreshnessIndicator lastUpdated={lastFetch} />
             </div>
@@ -94,16 +99,15 @@ export default function HomePage() {
               className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors disabled:opacity-50"
             >
               <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
-              Refresh
+              {tc("refresh")}
             </button>
           </div>
 
-          {/* Search */}
           <div className="relative lg:max-w-sm">
             <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
             <input
               type="text"
-              placeholder="Search crossings..."
+              placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-8 py-2 rounded-lg text-sm bg-white/[0.04] border border-subtle text-white placeholder:text-slate-600 focus:outline-none focus:border-slate-600 transition-colors"
@@ -120,7 +124,6 @@ export default function HomePage() {
         </div>
       </header>
 
-      {/* Content */}
       <main className="flex-1 px-4 lg:px-8">
         <div className="max-w-5xl mx-auto">
           {loading && (
@@ -133,12 +136,12 @@ export default function HomePage() {
 
           {error && (
             <div className="mt-12 text-center">
-              <p className="text-slate-500 text-sm">{error}</p>
+              <p className="text-slate-500 text-sm">{t("loadError")}</p>
               <button
                 onClick={fetchData}
                 className="mt-3 px-4 py-2 rounded-lg bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] transition-colors"
               >
-                Retry
+                {tc("retry")}
               </button>
             </div>
           )}
@@ -148,7 +151,7 @@ export default function HomePage() {
               {favorites.length > 0 && (
                 <section className="mt-4">
                   <h2 className="font-display font-semibold text-[11px] text-slate-500 uppercase tracking-widest mb-2 pl-1">
-                    Favorites
+                    {t("favorites")}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-1.5">
                     {favorites.map((c) => (
@@ -161,7 +164,7 @@ export default function HomePage() {
               {sortedStates.map((state) => (
                 <section key={state} className="mt-5">
                   <h2 className="font-display font-semibold text-[11px] text-slate-500 uppercase tracking-widest mb-2 pl-1">
-                    {stateNames[state] || state}
+                    {t(`states.${state}`) || state}
                   </h2>
                   <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-1.5">
                     {grouped[state].map((c) => (
@@ -174,7 +177,7 @@ export default function HomePage() {
               {filtered.length === 0 && search && (
                 <div className="mt-16 text-center">
                   <p className="text-slate-600 text-sm">
-                    No crossings match &ldquo;{search}&rdquo;
+                    {t("noResults", { query: search })}
                   </p>
                 </div>
               )}

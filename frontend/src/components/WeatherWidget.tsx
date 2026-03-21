@@ -1,45 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
 
 interface WeatherData {
   temperature: number;
   weatherCode: number;
-}
-
-const WMO_CODES: Record<number, [string, string]> = {
-  0: ["Clear", "clear"],
-  1: ["Mostly clear", "clear"],
-  2: ["Partly cloudy", "cloudy"],
-  3: ["Overcast", "cloudy"],
-  45: ["Fog", "fog"],
-  48: ["Rime fog", "fog"],
-  51: ["Light drizzle", "rain"],
-  53: ["Drizzle", "rain"],
-  55: ["Heavy drizzle", "rain"],
-  56: ["Freezing drizzle", "rain"],
-  57: ["Heavy freezing drizzle", "rain"],
-  61: ["Light rain", "rain"],
-  63: ["Rain", "rain"],
-  65: ["Heavy rain", "rain"],
-  66: ["Freezing rain", "rain"],
-  67: ["Heavy freezing rain", "rain"],
-  71: ["Light snow", "snow"],
-  73: ["Snow", "snow"],
-  75: ["Heavy snow", "snow"],
-  77: ["Snow grains", "snow"],
-  80: ["Light showers", "rain"],
-  81: ["Showers", "rain"],
-  82: ["Heavy showers", "rain"],
-  85: ["Light snow showers", "snow"],
-  86: ["Heavy snow showers", "snow"],
-  95: ["Thunderstorm", "storm"],
-  96: ["Thunderstorm w/ hail", "storm"],
-  99: ["Severe thunderstorm", "storm"],
-};
-
-function getWeatherInfo(code: number): [string, string] {
-  return WMO_CODES[code] ?? ["Unknown", "clear"];
 }
 
 interface WeatherWidgetProps {
@@ -47,10 +13,8 @@ interface WeatherWidgetProps {
   longitude: number;
 }
 
-export default function WeatherWidget({
-  latitude,
-  longitude,
-}: WeatherWidgetProps) {
+export default function WeatherWidget({ latitude, longitude }: WeatherWidgetProps) {
+  const t = useTranslations("weather");
   const [weather, setWeather] = useState<WeatherData | null>(null);
 
   useEffect(() => {
@@ -71,7 +35,8 @@ export default function WeatherWidget({
 
   if (!weather) return null;
 
-  const [desc] = getWeatherInfo(weather.weatherCode);
+  const codeKey = String(weather.weatherCode);
+  const desc = t.has(codeKey) ? t(codeKey) : t("unknown");
 
   return (
     <div>

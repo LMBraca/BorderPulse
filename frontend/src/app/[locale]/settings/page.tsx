@@ -1,11 +1,19 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Info, Globe, Github, Coffee, Car } from "lucide-react";
+import { useTranslations, useLocale } from "next-intl";
+import { useRouter, usePathname } from "@/i18n/navigation";
+import { Info, Globe, Github, Coffee, Car, Languages } from "lucide-react";
 import { BORDER_TIMEZONES, getUserTimezone, setUserTimezone } from "@/lib/timezone";
-import { LANE_OPTIONS, getPreferredLane, setPreferredLane, type LaneCode } from "@/lib/preferences";
+import { LANE_CODES, getPreferredLane, setPreferredLane, type LaneCode } from "@/lib/preferences";
 
 export default function SettingsPage() {
+  const t = useTranslations("settings");
+  const tl = useTranslations("lanes.full");
+  const locale = useLocale();
+  const router = useRouter();
+  const pathname = usePathname();
+
   const [tz, setTz] = useState("America/Tijuana");
   const [lane, setLane] = useState<LaneCode>("standard_vehicle");
 
@@ -19,25 +27,46 @@ export default function SettingsPage() {
     setUserTimezone(value);
   };
 
+  const handleLanguageChange = (newLocale: string) => {
+    router.replace(pathname, { locale: newLocale as "en" | "es" });
+  };
+
   return (
     <div className="min-h-dvh pb-24 lg:pb-0">
       <header className="px-4 lg:px-8 pt-6 pb-4">
         <div className="max-w-lg mx-auto lg:mx-0">
-          <h1 className="font-display font-bold text-lg text-white">Settings</h1>
+          <h1 className="font-display font-bold text-lg text-white">{t("title")}</h1>
         </div>
       </header>
 
       <main className="px-4 lg:px-8">
         <div className="max-w-lg mx-auto lg:mx-0 space-y-3">
+          {/* Language */}
+          <div className="rounded-xl bg-card border border-subtle p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <Languages size={18} className="text-slate-400" />
+              <div>
+                <h3 className="font-display font-semibold text-sm text-white">{t("language")}</h3>
+                <p className="text-xs text-slate-600 mt-0.5">{t("languageDesc")}</p>
+              </div>
+            </div>
+            <select
+              value={locale}
+              onChange={(e) => handleLanguageChange(e.target.value)}
+              className="w-full px-3 py-2 rounded-lg text-sm bg-white/[0.04] border border-subtle text-white focus:outline-none focus:border-slate-600 transition-colors"
+            >
+              <option value="en" className="bg-navy-800">English</option>
+              <option value="es" className="bg-navy-800">Español</option>
+            </select>
+          </div>
+
           {/* Timezone */}
           <div className="rounded-xl bg-card border border-subtle p-4">
             <div className="flex items-center gap-3 mb-3">
               <Globe size={18} className="text-slate-400" />
               <div>
-                <h3 className="font-display font-semibold text-sm text-white">Timezone</h3>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Used for prediction times and &ldquo;best time to cross&rdquo;
-                </p>
+                <h3 className="font-display font-semibold text-sm text-white">{t("timezone")}</h3>
+                <p className="text-xs text-slate-600 mt-0.5">{t("timezoneDesc")}</p>
               </div>
             </div>
             <select
@@ -58,10 +87,8 @@ export default function SettingsPage() {
             <div className="flex items-center gap-3 mb-3">
               <Car size={18} className="text-slate-400" />
               <div>
-                <h3 className="font-display font-semibold text-sm text-white">Crossing type</h3>
-                <p className="text-xs text-slate-600 mt-0.5">
-                  Wait time shown on crossing cards
-                </p>
+                <h3 className="font-display font-semibold text-sm text-white">{t("crossingType")}</h3>
+                <p className="text-xs text-slate-600 mt-0.5">{t("crossingTypeDesc")}</p>
               </div>
             </div>
             <select
@@ -73,9 +100,9 @@ export default function SettingsPage() {
               }}
               className="w-full px-3 py-2 rounded-lg text-sm bg-white/[0.04] border border-subtle text-white focus:outline-none focus:border-slate-600 transition-colors"
             >
-              {LANE_OPTIONS.map((o) => (
-                <option key={o.value} value={o.value} className="bg-navy-800">
-                  {o.label}
+              {LANE_CODES.map((code) => (
+                <option key={code} value={code} className="bg-navy-800">
+                  {tl(code)}
                 </option>
               ))}
             </select>
@@ -85,18 +112,11 @@ export default function SettingsPage() {
           <div className="rounded-xl bg-card border border-subtle p-4">
             <div className="flex items-center gap-3 mb-3">
               <Info size={18} className="text-slate-400" />
-              <h3 className="font-display font-semibold text-sm text-white">About</h3>
+              <h3 className="font-display font-semibold text-sm text-white">{t("about")}</h3>
             </div>
             <div className="text-sm text-slate-500 leading-relaxed space-y-2">
-              <p>
-                Real-time US-Mexico border wait times and predictions.
-                Data from the CBP Border Wait Times API, updated roughly
-                every 15 minutes.
-              </p>
-              <p>
-                Predictions based on historical day-of-week and hour-of-day
-                patterns. They improve as data accumulates.
-              </p>
+              <p>{t("aboutText1")}</p>
+              <p>{t("aboutText2")}</p>
             </div>
             <div className="flex gap-3 mt-4 pt-3 border-t border-subtle">
               <a
