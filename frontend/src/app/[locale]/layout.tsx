@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import "../globals.css";
 import AppShell from "@/components/AppShell";
-import { Analytics } from "@vercel/analytics/react";
+import { Analytics } from "@vercel/analytics/next";
 
 export async function generateMetadata({
   params,
