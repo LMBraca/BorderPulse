@@ -1,11 +1,35 @@
 {
   "lane_types": [
-    {"code": "standard_vehicle", "name_en": "Standard Vehicles", "name_es": "Vehiculos Estandar"},
-    {"code": "sentri", "name_en": "SENTRI", "name_es": "SENTRI"},
-    {"code": "ready_lane", "name_en": "Ready Lane", "name_es": "Ready Lane"},
-    {"code": "pedestrian", "name_en": "Pedestrian", "name_es": "Peatonal"},
-    {"code": "pedestrian_ready", "name_en": "Pedestrian Ready Lane", "name_es": "Peatonal Ready Lane"},
-    {"code": "commercial", "name_en": "Commercial / Trucks", "name_es": "Comercial / Camiones"}
+    {
+      "code": "standard_vehicle",
+      "name_en": "Standard Vehicles",
+      "name_es": "Vehiculos Estandar"
+    },
+    {
+      "code": "sentri",
+      "name_en": "SENTRI",
+      "name_es": "SENTRI"
+    },
+    {
+      "code": "ready_lane",
+      "name_en": "Ready Lane",
+      "name_es": "Ready Lane"
+    },
+    {
+      "code": "pedestrian",
+      "name_en": "Pedestrian",
+      "name_es": "Peatonal"
+    },
+    {
+      "code": "pedestrian_ready",
+      "name_en": "Pedestrian Ready Lane",
+      "name_es": "Peatonal Ready Lane"
+    },
+    {
+      "code": "commercial",
+      "name_en": "Commercial / Trucks",
+      "name_es": "Comercial / Camiones"
+    }
   ],
   "port_id_migrations": {},
   "ports": [
@@ -17,8 +41,8 @@
       "city_mx": "Tijuana",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.5422,
-      "longitude": -117.0292,
+      "latitude": 32.54333,
+      "longitude": -117.02972,
       "crossing_type": "land",
       "timezone": "America/Tijuana"
     },
@@ -30,8 +54,8 @@
       "city_mx": "Tijuana",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.5521,
-      "longitude": -116.9389,
+      "latitude": 32.550602,
+      "longitude": -116.938187,
       "crossing_type": "land",
       "timezone": "America/Tijuana"
     },
@@ -43,8 +67,8 @@
       "city_mx": "Tijuana",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.5437,
-      "longitude": -116.9287,
+      "latitude": 32.541,
+      "longitude": -116.917,
       "crossing_type": "land",
       "timezone": "America/Tijuana"
     },
@@ -56,8 +80,8 @@
       "city_mx": "Mexicali",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.6654,
-      "longitude": -115.4988,
+      "latitude": 32.665106,
+      "longitude": -115.496349,
       "crossing_type": "land",
       "timezone": "America/Tijuana"
     },
@@ -69,8 +93,8 @@
       "city_mx": "Mexicali",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.6720,
-      "longitude": -115.4170,
+      "latitude": 32.675506,
+      "longitude": -115.388675,
       "crossing_type": "land",
       "timezone": "America/Tijuana"
     },
@@ -82,8 +106,8 @@
       "city_mx": "Tecate",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.5729,
-      "longitude": -116.6266,
+      "latitude": 32.576852,
+      "longitude": -116.627179,
       "crossing_type": "land",
       "timezone": "America/Tijuana"
     },
@@ -95,8 +119,8 @@
       "city_mx": "Los Algodones",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.7193,
-      "longitude": -114.7267,
+      "latitude": 32.7187,
+      "longitude": -114.7277,
       "crossing_type": "land",
       "timezone": "America/Tijuana"
     },
@@ -108,8 +132,8 @@
       "city_mx": "Tijuana",
       "state_us": "CA",
       "state_mx": "Baja California",
-      "latitude": 32.5412,
-      "longitude": -116.9804,
+      "latitude": 32.548208,
+      "longitude": -116.974556,
       "crossing_type": "pedestrian_bridge",
       "timezone": "America/Tijuana"
     },
@@ -121,8 +145,8 @@
       "city_mx": "Nogales",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 31.3325,
-      "longitude": -110.9420,
+      "latitude": 31.332806,
+      "longitude": -110.942722,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -134,8 +158,8 @@
       "city_mx": "Nogales",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 31.3505,
-      "longitude": -110.9693,
+      "latitude": 31.3339,
+      "longitude": -110.965594,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -147,8 +171,8 @@
       "city_mx": "Nogales",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 31.3342,
-      "longitude": -110.9429,
+      "latitude": 31.332806,
+      "longitude": -110.942722,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -160,8 +184,8 @@
       "city_mx": "Agua Prieta",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 31.3341,
-      "longitude": -109.5454,
+      "latitude": 31.334679,
+      "longitude": -109.560374,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -173,8 +197,8 @@
       "city_mx": "Naco",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 31.3355,
-      "longitude": -109.9479,
+      "latitude": 31.334559,
+      "longitude": -109.947967,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -186,8 +210,8 @@
       "city_mx": "Sonoyta",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 31.8778,
-      "longitude": -112.8183,
+      "latitude": 31.880423,
+      "longitude": -112.816919,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -199,8 +223,8 @@
       "city_mx": "San Luis Rio Colorado",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 32.4870,
-      "longitude": -114.7818,
+      "latitude": 32.485339,
+      "longitude": -114.78212,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -212,8 +236,8 @@
       "city_mx": "San Luis Rio Colorado",
       "state_us": "AZ",
       "state_mx": "Sonora",
-      "latitude": 32.4893,
-      "longitude": -114.7820,
+      "latitude": 32.4617,
+      "longitude": -114.6988,
       "crossing_type": "land",
       "timezone": "America/Phoenix"
     },
@@ -225,8 +249,8 @@
       "city_mx": "Las Palomas",
       "state_us": "NM",
       "state_mx": "Chihuahua",
-      "latitude": 31.8218,
-      "longitude": -107.6389,
+      "latitude": 31.784399,
+      "longitude": -107.627622,
       "crossing_type": "land",
       "timezone": "America/Denver"
     },
@@ -238,8 +262,8 @@
       "city_mx": "San Jeronimo",
       "state_us": "NM",
       "state_mx": "Chihuahua",
-      "latitude": 31.7837,
-      "longitude": -106.6890,
+      "latitude": 31.785877,
+      "longitude": -106.680315,
       "crossing_type": "land",
       "timezone": "America/Denver"
     },
@@ -251,8 +275,8 @@
       "city_mx": "Ciudad Juarez",
       "state_us": "TX",
       "state_mx": "Chihuahua",
-      "latitude": 31.7558,
-      "longitude": -106.4530,
+      "latitude": 31.767261,
+      "longitude": -106.450932,
       "crossing_type": "land",
       "timezone": "America/Denver"
     },
@@ -264,8 +288,8 @@
       "city_mx": "Ciudad Juarez",
       "state_us": "TX",
       "state_mx": "Chihuahua",
-      "latitude": 31.7617,
-      "longitude": -106.4432,
+      "latitude": 31.749929,
+      "longitude": -106.486691,
       "crossing_type": "land",
       "timezone": "America/Denver"
     },
@@ -277,8 +301,8 @@
       "city_mx": "Ciudad Juarez",
       "state_us": "TX",
       "state_mx": "Chihuahua",
-      "latitude": 31.6638,
-      "longitude": -106.3780,
+      "latitude": 31.6711,
+      "longitude": -106.338,
       "crossing_type": "land",
       "timezone": "America/Denver"
     },
@@ -290,8 +314,8 @@
       "city_mx": "Guadalupe",
       "state_us": "TX",
       "state_mx": "Chihuahua",
-      "latitude": 31.4450,
-      "longitude": -106.0867,
+      "latitude": 31.43278,
+      "longitude": -106.148058,
       "crossing_type": "land",
       "timezone": "America/Denver"
     },
@@ -303,8 +327,8 @@
       "city_mx": "Ojinaga",
       "state_us": "TX",
       "state_mx": "Chihuahua",
-      "latitude": 29.5608,
-      "longitude": -104.3691,
+      "latitude": 29.56,
+      "longitude": -104.396,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -316,8 +340,8 @@
       "city_mx": "Ciudad Acuna",
       "state_us": "TX",
       "state_mx": "Coahuila",
-      "latitude": 29.3706,
-      "longitude": -100.9237,
+      "latitude": 29.326756,
+      "longitude": -100.927514,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -329,8 +353,8 @@
       "city_mx": "Piedras Negras",
       "state_us": "TX",
       "state_mx": "Coahuila",
-      "latitude": 28.7091,
-      "longitude": -100.4995,
+      "latitude": 28.705779,
+      "longitude": -100.506594,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -342,8 +366,8 @@
       "city_mx": "Piedras Negras",
       "state_us": "TX",
       "state_mx": "Coahuila",
-      "latitude": 28.7050,
-      "longitude": -100.4960,
+      "latitude": 28.698328,
+      "longitude": -100.506411,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -355,8 +379,8 @@
       "city_mx": "Nuevo Laredo",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 27.5010,
-      "longitude": -99.5070,
+      "latitude": 27.499,
+      "longitude": -99.507,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -368,8 +392,8 @@
       "city_mx": "Nuevo Laredo",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 27.5059,
-      "longitude": -99.5067,
+      "latitude": 27.501415,
+      "longitude": -99.507385,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -381,8 +405,8 @@
       "city_mx": "Nuevo Laredo",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 27.5020,
-      "longitude": -99.5050,
+      "latitude": 27.500216,
+      "longitude": -99.502814,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -394,8 +418,8 @@
       "city_mx": "Colombia",
       "state_us": "TX",
       "state_mx": "Nuevo Leon",
-      "latitude": 27.1647,
-      "longitude": -99.5903,
+      "latitude": 27.701502,
+      "longitude": -99.74262,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -407,8 +431,8 @@
       "city_mx": "Nuevo Laredo",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 27.4960,
-      "longitude": -99.5167,
+      "latitude": 27.598977,
+      "longitude": -99.528666,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -420,8 +444,8 @@
       "city_mx": "Reynosa",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 26.0992,
-      "longitude": -98.2620,
+      "latitude": 26.096867,
+      "longitude": -98.269964,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -433,8 +457,8 @@
       "city_mx": "Reynosa",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 26.1404,
-      "longitude": -98.3247,
+      "latitude": 26.145229,
+      "longitude": -98.312069,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -446,8 +470,8 @@
       "city_mx": "Reynosa",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 26.1595,
-      "longitude": -98.1855,
+      "latitude": 26.088436,
+      "longitude": -98.200859,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -459,8 +483,8 @@
       "city_mx": "Camargo",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 26.3804,
-      "longitude": -98.8227,
+      "latitude": 26.366961,
+      "longitude": -98.801336,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -472,8 +496,8 @@
       "city_mx": "Ciudad Miguel Aleman",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 26.4052,
-      "longitude": -99.0162,
+      "latitude": 26.404209,
+      "longitude": -99.017125,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -485,8 +509,8 @@
       "city_mx": "Nuevo Progreso",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 26.0684,
-      "longitude": -97.9553,
+      "latitude": 26.063318,
+      "longitude": -97.949821,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -498,8 +522,8 @@
       "city_mx": "Matamoros",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 25.9032,
-      "longitude": -97.4966,
+      "latitude": 25.899143,
+      "longitude": -97.496978,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     },
@@ -511,8 +535,8 @@
       "city_mx": "Matamoros",
       "state_us": "TX",
       "state_mx": "Tamaulipas",
-      "latitude": 25.9520,
-      "longitude": -97.4870,
+      "latitude": 25.889014,
+      "longitude": -97.475746,
       "crossing_type": "land",
       "timezone": "America/Chicago"
     }
