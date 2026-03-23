@@ -3,12 +3,15 @@
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { Info, Globe, Github, Coffee, Car, Languages } from "lucide-react";
+import { Info, Globe, Github, Coffee, Car, Languages, MessageCircle, CheckCircle } from "lucide-react";
 import { BORDER_TIMEZONES, getUserTimezone, setUserTimezone } from "@/lib/timezone";
 import { LANE_CODES, getPreferredLane, setPreferredLane, type LaneCode } from "@/lib/preferences";
 
+type FeedbackType = "bug" | "feature" | "other";
+
 export default function SettingsPage() {
   const t = useTranslations("settings");
+  const tf = useTranslations("feedback");
   const tl = useTranslations("lanes.full");
   const locale = useLocale();
   const router = useRouter();
@@ -17,10 +20,34 @@ export default function SettingsPage() {
   const [tz, setTz] = useState("America/Tijuana");
   const [lane, setLane] = useState<LaneCode>("standard_vehicle");
 
+  const [fbType, setFbType] = useState<FeedbackType>("bug");
+  const [fbMessage, setFbMessage] = useState("");
+  const [fbStatus, setFbStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
+  const [fbHoneypot, setFbHoneypot] = useState("");
+  const [fbLoadTime] = useState(() => Date.now());
+
   useEffect(() => {
     setTz(getUserTimezone());
     setLane(getPreferredLane());
   }, []);
+
+  const handleFeedbackSubmit = async () => {
+    if (!fbMessage.trim()) return;
+    setFbStatus("sending");
+    try {
+      const res = await fetch("/api/feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: fbType, message: fbMessage.trim(), website: fbHoneypot, _t: fbLoadTime }),
+      });
+      if (!res.ok) throw new Error();
+      setFbStatus("success");
+      setFbMessage("");
+      setTimeout(() => setFbStatus("idle"), 3000);
+    } catch {
+      setFbStatus("error");
+    }
+  };
 
   const handleTzChange = (value: string) => {
     setTz(value);
@@ -106,6 +133,79 @@ export default function SettingsPage() {
                 </option>
               ))}
             </select>
+          </div>
+
+          {/* Feedback */}
+          <div className="rounded-xl bg-card border border-subtle p-4">
+            <div className="flex items-center gap-3 mb-1">
+              <MessageCircle size={18} className="text-slate-400" />
+              <div>
+                <h3 className="font-display font-semibold text-sm text-white">{tf("title")}</h3>
+                <p className="text-xs text-slate-600 mt-0.5">{tf("description")}</p>
+              </div>
+            </div>
+
+            <div className="flex gap-1.5 my-3">
+              {(["bug", "feature", "other"] as FeedbackType[]).map((type) => (
+                <button
+                  key={type}
+                  onClick={() => setFbType(type)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                    fbType === type
+                      ? "bg-white/[0.08] text-white border-white/[0.1]"
+                      : "text-slate-500 border-transparent hover:text-slate-400"
+                  }`}
+                >
+                  {tf(type)}
+                </button>
+              ))}
+            </div>
+
+            {/* Honeypot */}
+            <input
+              type="text"
+              name="website"
+              value={fbHoneypot}
+              onChange={(e) => setFbHoneypot(e.target.value)}
+              tabIndex={-1}
+              autoComplete="off"
+              aria-hidden="true"
+              className="absolute opacity-0 h-0 w-0 overflow-hidden pointer-events-none"
+            />
+
+            <textarea
+              value={fbMessage}
+              onChange={(e) => {
+                setFbMessage(e.target.value);
+                if (fbStatus === "error") setFbStatus("idle");
+              }}
+              placeholder={tf("placeholder")}
+              maxLength={1000}
+              rows={4}
+              disabled={fbStatus === "sending" || fbStatus === "success"}
+              className="w-full px-3 py-2 rounded-lg text-sm bg-white/[0.04] border border-subtle text-white placeholder:text-slate-600 focus:outline-none focus:border-slate-600 transition-colors resize-none disabled:opacity-50"
+            />
+
+            <div className="flex items-center justify-between mt-2">
+              <div className="text-xs">
+                {fbStatus === "success" && (
+                  <span className="flex items-center gap-1 text-emerald-400">
+                    <CheckCircle size={14} />
+                    {tf("success")}
+                  </span>
+                )}
+                {fbStatus === "error" && (
+                  <span className="text-red-400">{tf("error")}</span>
+                )}
+              </div>
+              <button
+                onClick={handleFeedbackSubmit}
+                disabled={fbStatus === "sending" || fbStatus === "success" || !fbMessage.trim()}
+                className="px-4 py-1.5 rounded-lg text-xs font-medium bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {fbStatus === "sending" ? tf("sending") : tf("submit")}
+              </button>
+            </div>
           </div>
 
           {/* About */}

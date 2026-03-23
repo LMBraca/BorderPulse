@@ -134,6 +134,19 @@
     "legendYellow": "20–45 min",
     "legendRed": "> 45 min"
   },
+  "feedback": {
+    "title": "Comentarios",
+    "description": "Reporta un error, sugiere una funcion o comparte tu opinion",
+    "bug": "Error",
+    "feature": "Sugerencia",
+    "other": "Otro",
+    "placeholder": "Describe tu comentario...",
+    "submit": "Enviar",
+    "sending": "Enviando...",
+    "success": "Gracias por tu comentario!",
+    "error": "Error al enviar. Intenta de nuevo.",
+    "empty": "Por favor escribe un mensaje"
+  },
   "settings": {
     "title": "Ajustes",
     "timezone": "Zona horaria",

@@ -134,6 +134,19 @@
     "legendYellow": "20–45 min",
     "legendRed": "> 45 min"
   },
+  "feedback": {
+    "title": "Feedback",
+    "description": "Report a bug, suggest a feature, or share your thoughts",
+    "bug": "Bug",
+    "feature": "Feature",
+    "other": "Other",
+    "placeholder": "Describe your feedback...",
+    "submit": "Send Feedback",
+    "sending": "Sending...",
+    "success": "Thanks for your feedback!",
+    "error": "Failed to send. Please try again.",
+    "empty": "Please enter a message"
+  },
   "settings": {
     "title": "Settings",
     "timezone": "Timezone",
