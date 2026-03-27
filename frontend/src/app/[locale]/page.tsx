@@ -42,7 +42,7 @@ export default function HomePage() {
 
   const CBP_STALE_THRESHOLD = 30 * 60 * 1000; // 30 minutes
   const dataAge = dataLastUpdated ? Date.now() - new Date(dataLastUpdated).getTime() : null;
-  const isCbpStale = dataAge !== null && dataAge > CBP_STALE_THRESHOLD;
+  const isCbpStale = crossings.length > 0 && (dataAge === null || dataAge > CBP_STALE_THRESHOLD);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -134,18 +134,20 @@ export default function HomePage() {
         </div>
       </header>
 
-      {isCbpStale && dataAge !== null && (
+      {isCbpStale && (
         <div className="bg-yellow-400/10 border-b border-yellow-400/20 px-4 lg:px-8 py-2.5">
           <div className="max-w-5xl mx-auto flex items-center gap-2">
             <AlertTriangle size={14} className="text-yellow-400 shrink-0" />
             <p className="text-xs text-yellow-400/90">
-              {tc("cbpStale", {
-                time: dataAge >= 86400000
-                  ? tc("daysAgo", { days: Math.floor(dataAge / 86400000), hrs: Math.floor((dataAge % 86400000) / 3600000) })
-                  : dataAge >= 3600000
-                    ? tc("hoursAgo", { hrs: Math.floor(dataAge / 3600000) })
-                    : tc("minsAgo", { mins: Math.floor(dataAge / 60000) })
-              })}
+              {dataAge !== null
+                ? tc("cbpStale", {
+                    time: dataAge >= 86400000
+                      ? tc("daysAgo", { days: Math.floor(dataAge / 86400000), hrs: Math.floor((dataAge % 86400000) / 3600000) })
+                      : dataAge >= 3600000
+                        ? tc("hoursAgo", { hrs: Math.floor(dataAge / 3600000) })
+                        : tc("minsAgo", { mins: Math.floor(dataAge / 60000) })
+                  })
+                : tc("cbpNoData")}
             </p>
           </div>
         </div>

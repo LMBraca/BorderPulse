@@ -19,8 +19,10 @@ export default function FreshnessIndicator({ lastUpdated, dataLastUpdated }: Fre
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return t("justNow");
     if (mins < 60) return t("minsAgo", { mins });
-    const hrs = Math.floor(mins / 60);
-    return t("hoursAgo", { hrs });
+    const hrs = Math.floor(diff / 3600000);
+    if (hrs < 24) return t("hoursAgo", { hrs });
+    const days = Math.floor(hrs / 24);
+    return t("daysAgo", { days, hrs: hrs % 24 });
   };
 
   const ago = getAgo();

@@ -15,7 +15,8 @@
     "stale": "Stale",
     "perDay": "/day",
     "cbpStale": "CBP data hasn't updated in {time}. Showing last known wait times.",
-    "daysAgo": "{days}d {hrs}h"
+    "daysAgo": "{days}d {hrs}h",
+    "cbpNoData": "No data available from CBP. Wait times may be unavailable."
   },
   "nav": {
     "home": "Home",

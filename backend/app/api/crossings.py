@@ -85,6 +85,7 @@ async def get_latest_from_db(
             "lanesOpen": obs.lanes_open,
             "isClosed": obs.is_closed,
             "updatedAt": obs.observed_at.isoformat(),
+            "cbpUpdatedAt": obs.cbp_updated_at.isoformat() if obs.cbp_updated_at else None,
         }
     return result
 
@@ -139,7 +140,7 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
         for lane_id, lane in lanes.items():
             live = port_live.get(lane_id, {})
             wait = live.get("waitMinutes")
-            updated = live.get("updatedAt")
+            updated = live.get("cbpUpdatedAt") or live.get("updatedAt")
 
             lane_waits.append(LaneWaitTime(
                 laneType=lane.code,
@@ -247,8 +248,8 @@ async def get_crossing(crossing_id: int, db: AsyncSession = Depends(get_db)):
                 laneTypeLabel=lane.name_en,
             ))
 
-    # Get recent 24h history
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+    # Get recent 48h history (wide enough to survive CBP data stalls)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
     history_result = await db.execute(
         select(
             WaitTimeObservation.observed_at,
