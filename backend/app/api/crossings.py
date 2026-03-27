@@ -51,7 +51,7 @@ async def get_latest_from_db(
     db: AsyncSession, lane_map: dict[int, LaneType]
 ) -> dict[int, dict[int, dict]]:
     """When Redis is empty, grab the latest observation per port+lane directly from PG."""
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
 
     # Subquery: latest observed_at per (port, lane)
     latest_sq = (

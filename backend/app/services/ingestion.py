@@ -231,7 +231,16 @@ async def store_observations(observations: list[dict]) -> int:
     stored = 0
     async with AsyncSessionLocal() as session:
         for obs in observations:
-            # Deduplicate: skip if we already have this port+lane+cbp_timestamp
+            # Always update live cache so it stays fresh even when deduplicating
+            await cache_live_wait(obs["port_id"], obs["lane_type_id"], {
+                "waitMinutes": obs["wait_minutes"],
+                "lanesOpen": obs["lanes_open"],
+                "isClosed": obs["is_closed"],
+                "updatedAt": obs["observed_at"].isoformat(),
+                "cbpUpdatedAt": obs["cbp_updated_at"].isoformat() if obs["cbp_updated_at"] else None,
+            })
+
+            # Deduplicate: skip DB insert if we already have this port+lane+cbp_timestamp
             if obs["cbp_updated_at"]:
                 existing = await session.execute(
                     select(WaitTimeObservation).where(
@@ -247,15 +256,6 @@ async def store_observations(observations: list[dict]) -> int:
 
             session.add(WaitTimeObservation(**obs))
             stored += 1
-
-            # Update live cache (graceful — won't crash if Redis is down)
-            await cache_live_wait(obs["port_id"], obs["lane_type_id"], {
-                "waitMinutes": obs["wait_minutes"],
-                "lanesOpen": obs["lanes_open"],
-                "isClosed": obs["is_closed"],
-                "updatedAt": obs["observed_at"].isoformat(),
-                "cbpUpdatedAt": obs["cbp_updated_at"].isoformat() if obs["cbp_updated_at"] else None,
-            })
 
         await session.commit()
 

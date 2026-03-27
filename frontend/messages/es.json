@@ -13,7 +13,9 @@
     "minsAgo": "hace {mins}m",
     "hoursAgo": "hace {hrs}h",
     "stale": "Desactualizado",
-    "perDay": "/dia"
+    "perDay": "/dia",
+    "cbpStale": "Los datos de CBP no se han actualizado en {time}. Mostrando ultimos tiempos conocidos.",
+    "daysAgo": "{days}d {hrs}h"
   },
   "nav": {
     "home": "Inicio",
