@@ -113,13 +113,20 @@ async def get_cached_predictions(port_id: int, lane_type_id: int, date: str) -> 
 INGESTION_STATUS_KEY = "ingestion:last_success"
 
 
-async def set_ingestion_status(success: bool, record_count: int):
+async def set_ingestion_status(
+    success: bool,
+    record_count: int,
+    source: str = "cbp_api",
+    json_age_seconds: Optional[float] = None,
+):
     try:
         r = await get_redis()
         status = {
             "success": success,
             "record_count": record_count,
+            "source": source,
             "timestamp": datetime.utcnow().isoformat(),
+            "json_age_seconds": json_age_seconds,
         }
         await r.set(INGESTION_STATUS_KEY, json.dumps(status), ex=1800)
     except Exception as e:

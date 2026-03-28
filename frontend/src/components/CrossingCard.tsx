@@ -77,8 +77,10 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
     const mins = Math.floor(diff / 60000);
     if (mins < 1) return tc("justNow");
     if (mins < 60) return tc("minsAgo", { mins });
-    const hrs = Math.floor(mins / 60);
-    return tc("hoursAgo", { hrs });
+    const hrs = Math.floor(diff / 3600000);
+    if (hrs < 24) return tc("hoursAgo", { hrs });
+    const days = Math.floor(hrs / 24);
+    return tc("daysAgo", { days, hrs: hrs % 24 });
   };
 
   return (
@@ -150,6 +152,11 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
                       >
                         {lane.isClosed ? tc("closed") : `${lane.waitMinutes}m`}
                       </span>
+                      {lane.lanesOpen != null && lane.maxLanes != null && (
+                        <span className="text-[10px] text-slate-600 tabular-nums">
+                          {lane.lanesOpen}/{lane.maxLanes}
+                        </span>
+                      )}
                     </div>
                   );
                 })}

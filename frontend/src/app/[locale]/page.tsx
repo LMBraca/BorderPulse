@@ -7,7 +7,7 @@ import FreshnessIndicator from "@/components/FreshnessIndicator";
 import { getCrossings } from "@/lib/api";
 import { getFavorites } from "@/lib/favorites";
 import type { CrossingSummary } from "@/lib/types";
-import { Search, X, RefreshCw } from "lucide-react";
+import { Search, X, RefreshCw, AlertTriangle } from "lucide-react";
 
 export default function HomePage() {
   const t = useTranslations("home");
@@ -33,6 +33,16 @@ export default function HomePage() {
       setLoading(false);
     }
   }, []);
+
+  // Find the most recent CBP data timestamp across all crossings
+  const dataLastUpdated = crossings.reduce<string | null>((latest, c) => {
+    if (c.lastUpdated && (!latest || c.lastUpdated > latest)) return c.lastUpdated;
+    return latest;
+  }, null);
+
+  const CBP_STALE_THRESHOLD = 30 * 60 * 1000; // 30 minutes
+  const dataAge = dataLastUpdated ? Date.now() - new Date(dataLastUpdated).getTime() : null;
+  const isCbpStale = crossings.length > 0 && (dataAge === null || dataAge > CBP_STALE_THRESHOLD);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -91,7 +101,7 @@ export default function HomePage() {
               <h1 className="font-display font-bold text-lg text-white tracking-tight hidden lg:block">
                 {t("allCrossings")}
               </h1>
-              <FreshnessIndicator lastUpdated={lastFetch} />
+              <FreshnessIndicator lastUpdated={lastFetch} dataLastUpdated={dataLastUpdated} />
             </div>
             <button
               onClick={handleRefresh}
@@ -123,6 +133,25 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
+      {isCbpStale && (
+        <div className="bg-yellow-400/10 border-b border-yellow-400/20 px-4 lg:px-8 py-2.5">
+          <div className="max-w-5xl mx-auto flex items-center gap-2">
+            <AlertTriangle size={14} className="text-yellow-400 shrink-0" />
+            <p className="text-xs text-yellow-400/90">
+              {dataAge !== null
+                ? tc("cbpStale", {
+                    time: dataAge >= 86400000
+                      ? tc("daysAgo", { days: Math.floor(dataAge / 86400000), hrs: Math.floor((dataAge % 86400000) / 3600000) })
+                      : dataAge >= 3600000
+                        ? tc("hoursAgo", { hrs: Math.floor(dataAge / 3600000) })
+                        : tc("minsAgo", { mins: Math.floor(dataAge / 60000) })
+                  })
+                : tc("cbpNoData")}
+            </p>
+          </div>
+        </div>
+      )}
 
       <main className="flex-1 px-4 lg:px-8">
         <div className="max-w-5xl mx-auto">

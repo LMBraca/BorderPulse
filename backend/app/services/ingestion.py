@@ -4,18 +4,17 @@ CBP Border Wait Times ingestion service.
 Fetches current wait times from the CBP BWT API, normalizes the data,
 deduplicates against recent observations, and stores in TimescaleDB.
 
-Real API endpoint: https://bwt.cbp.gov/api/waittimes
-Returns a flat JSON array. Each entry has nested lane groups:
-  - passenger_vehicle_lanes.standard_lanes
-  - passenger_vehicle_lanes.NEXUS_SENTRI_lanes
-  - pedestrian_lanes.standard_lanes
-  - commercial_vehicle_lanes.standard_lanes
-Each lane dict has: update_time, operational_status, delay_minutes, lanes_open
+Primary API: https://bwt.cbp.gov/api/waittimes (JSON, all ports, single call)
+Fallback RSS: https://bwt.cbp.gov/api/bwtRss/rssbyportnum/HTML/{POV|PED|COM}/{port}
+  Used when the JSON API is stale (>30 min behind wall clock).
 """
+import asyncio
+import re
 import httpx
 import structlog
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from typing import Optional
+from xml.etree import ElementTree
 from sqlalchemy import select, and_
 from app.database import AsyncSessionLocal
 from app.models.port import PortOfEntry, LaneType
@@ -25,6 +24,9 @@ from app.config import get_settings
 
 logger = structlog.get_logger()
 settings = get_settings()
+
+STALE_THRESHOLD = timedelta(minutes=30)
+RSS_CONCURRENCY = 10  
 
 
 def parse_wait_minutes(value: str) -> Optional[int]:
@@ -51,6 +53,15 @@ def parse_delay_minutes(value: str) -> Optional[int]:
 
 
 def parse_lanes_open(value) -> Optional[int]:
+    if value is None or str(value).strip() in ("", "N/A"):
+        return None
+    try:
+        return max(0, int(value))
+    except (ValueError, TypeError):
+        return None
+
+
+def parse_max_lanes(value) -> Optional[int]:
     if value is None or str(value).strip() in ("", "N/A"):
         return None
     try:
@@ -86,6 +97,30 @@ def parse_cbp_timestamp(date_str: str, time_str: str) -> Optional[datetime]:
         return dt.replace(tzinfo=timezone.utc)
     except (ValueError, TypeError):
         return None
+
+
+def parse_rss_timestamp(pub_date: str) -> Optional[datetime]:
+    if not pub_date:
+        return None
+    try:
+
+        cleaned = pub_date.strip()
+        parts = cleaned.rsplit(" ", 1)
+        if len(parts) == 2:
+            dt_str, tz_str = parts
+            dt = datetime.strptime(dt_str, "%a, %d %b %Y %H:%M:%S")
+            tz_offsets = {
+                "EST": -5, "EDT": -4, "PST": -8, "PDT": -7,
+                "CST": -6, "CDT": -5, "MST": -7, "MDT": -6,
+            }
+            offset_hours = tz_offsets.get(tz_str, 0)
+            dt = dt.replace(tzinfo=timezone(timedelta(hours=offset_hours)))
+            return dt.astimezone(timezone.utc)
+        return None
+    except (ValueError, TypeError):
+        return None
+
+
 
 
 async def fetch_cbp_data() -> Optional[list[dict]]:
@@ -135,23 +170,7 @@ async def load_lane_type_map() -> dict[str, int]:
 def normalize_cbp_record(record: dict, port_map: dict, lane_map: dict) -> list[dict]:
     """
     Normalize a single CBP API record into our observation format.
-
-    Real API structure per record:
-        port_number: "250401"
-        border: "Mexican Border"
-        port_name: "San Ysidro"
-        date: "3/18/2026"
-        time: "10:22:17"
-        passenger_vehicle_lanes:
-            standard_lanes: {delay_minutes, lanes_open, operational_status, update_time}
-            NEXUS_SENTRI_lanes: {delay_minutes, lanes_open, operational_status, update_time}
-            ready_lanes: ...
-        pedestrian_lanes:
-            standard_lanes: ...
-            ready_lanes: ...
-        commercial_vehicle_lanes:
-            standard_lanes: ...
-            FAST_lanes: ...
+    Extracts maxLanes and updateTime for each lane group.
     """
     observations = []
 
@@ -170,7 +189,6 @@ def normalize_cbp_record(record: dict, port_map: dict, lane_map: dict) -> list[d
     now = datetime.now(timezone.utc)
 
     # Map our lane codes to the correct nested path in the CBP response
-    # SENTRI (NEXUS_SENTRI_lanes) and Ready Lane (ready_lanes) are separate programs
     lane_configs = [
         ("standard_vehicle", record.get("passenger_vehicle_lanes", {}), "standard_lanes"),
         ("sentri", record.get("passenger_vehicle_lanes", {}), "NEXUS_SENTRI_lanes"),
@@ -203,6 +221,8 @@ def normalize_cbp_record(record: dict, port_map: dict, lane_map: dict) -> list[d
         closed = is_closed(operational_status, lanes_open_str)
         wait_min = parse_delay_minutes(delay_str)
         lanes_open = parse_lanes_open(lanes_open_str)
+        max_lanes = parse_max_lanes(parent_group.get("maximum_lanes"))
+        update_time = str(lane_data.get("update_time", "")).strip() or None
 
         # "no delay" with 0 delay_minutes means 0 wait
         if not closed and wait_min is None and "no delay" in operational_status.lower():
@@ -218,10 +238,207 @@ def normalize_cbp_record(record: dict, port_map: dict, lane_map: dict) -> list[d
             "is_closed": closed,
             "source": "cbp_api",
             "cbp_updated_at": cbp_updated,
+            "max_lanes": max_lanes,
+            "update_time": update_time,
         })
 
     return observations
 
+
+RSS_LANE_MAP_POV = {
+    "general": "standard_vehicle",
+    "sentri": "sentri",
+    "ready": "ready_lane",
+}
+RSS_LANE_MAP_PED = {
+    "general": "pedestrian",
+    "ready": "pedestrian_ready",
+}
+RSS_LANE_MAP_COM = {
+    "general": "commercial",
+    "fast": "commercial",
+}
+
+_RSS_LANE_RE = re.compile(
+    r"(General|Sentri|Ready|FAST)\s+Lanes?:\s*"
+    r"(?:At\s+(.+?)\s+)?" 
+    r"(\d+)\s+min\s+delay\s+"
+    r"(\d+)\s+lane\(s\)\s+open",
+    re.IGNORECASE,
+)
+_RSS_CLOSED_RE = re.compile(
+    r"(General|Sentri|Ready|FAST)\s+Lanes?:\s*Closed",
+    re.IGNORECASE,
+)
+_RSS_NA_RE = re.compile(
+    r"(General|Sentri|Ready|FAST)\s+Lanes?:\s*N/A",
+    re.IGNORECASE,
+)
+_RSS_MAX_LANES_RE = re.compile(
+    r"Maximum\s+Lanes:\s*(\d+)",
+    re.IGNORECASE,
+)
+_RSS_NO_DELAY_RE = re.compile(
+    r"(General|Sentri|Ready|FAST)\s+Lanes?:\s*"
+    r"(?:At\s+(.+?)\s+)?"
+    r"no\s+delay\s+"
+    r"(\d+)\s+lane\(s\)\s+open",
+    re.IGNORECASE,
+)
+
+
+async def _fetch_single_rss(
+    client: httpx.AsyncClient,
+    sem: asyncio.Semaphore,
+    port_number: str,
+    rss_type: str,
+) -> Optional[tuple[str, str, str]]:
+    """Fetch a single RSS feed. Returns (port_number, rss_type, xml_text) or None."""
+    url = f"{settings.cbp_rss_base_url}/{rss_type}/{port_number}"
+    async with sem:
+        try:
+            resp = await client.get(url, timeout=15.0)
+            if resp.status_code == 200:
+                text = resp.text
+                if "<title>Page not found</title>" in text:
+                    return None
+                return (port_number, rss_type, text)
+        except Exception as e:
+            logger.debug("rss_fetch_error", port=port_number, type=rss_type, error=str(e))
+    return None
+
+
+def _parse_rss_description(
+    description: str,
+    lane_name_map: dict[str, str],
+) -> list[dict]:
+    lanes = []
+    max_lanes_match = _RSS_MAX_LANES_RE.search(description)
+    max_lanes = int(max_lanes_match.group(1)) if max_lanes_match else None
+
+    for m in _RSS_LANE_RE.finditer(description):
+        lane_name = m.group(1).lower()
+        update_time = m.group(2)
+        delay = int(m.group(3))
+        lanes_open = int(m.group(4))
+        lane_code = lane_name_map.get(lane_name)
+        if lane_code:
+            lanes.append({
+                "lane_code": lane_code,
+                "wait_minutes": delay,
+                "lanes_open": lanes_open,
+                "is_closed": False,
+                "max_lanes": max_lanes,
+                "update_time": f"At {update_time}" if update_time else None,
+            })
+
+    for m in _RSS_NO_DELAY_RE.finditer(description):
+        lane_name = m.group(1).lower()
+        update_time = m.group(2)
+        lanes_open = int(m.group(3))
+        lane_code = lane_name_map.get(lane_name)
+        if lane_code and not any(l["lane_code"] == lane_code for l in lanes):
+            lanes.append({
+                "lane_code": lane_code,
+                "wait_minutes": 0,
+                "lanes_open": lanes_open,
+                "is_closed": False,
+                "max_lanes": max_lanes,
+                "update_time": f"At {update_time}" if update_time else None,
+            })
+
+    for m in _RSS_CLOSED_RE.finditer(description):
+        lane_name = m.group(1).lower()
+        lane_code = lane_name_map.get(lane_name)
+        if lane_code and not any(l["lane_code"] == lane_code for l in lanes):
+            lanes.append({
+                "lane_code": lane_code,
+                "wait_minutes": None,
+                "lanes_open": 0,
+                "is_closed": True,
+                "max_lanes": max_lanes,
+                "update_time": None,
+            })
+
+    return lanes
+
+
+async def fetch_cbp_rss_data(
+    port_numbers: list[str],
+    port_map: dict[str, int],
+    lane_map: dict[str, int],
+) -> list[dict]:
+    log = logger.bind(service="rss_fallback")
+    sem = asyncio.Semaphore(RSS_CONCURRENCY)
+    now = datetime.now(timezone.utc)
+    observations = []
+
+    rss_types = [
+        ("POV", RSS_LANE_MAP_POV),
+        ("PED", RSS_LANE_MAP_PED),
+        ("COM", RSS_LANE_MAP_COM),
+    ]
+
+    async with httpx.AsyncClient() as client:
+        tasks = []
+        for port_number in port_numbers:
+            for rss_type, _ in rss_types:
+                tasks.append(_fetch_single_rss(client, sem, port_number, rss_type))
+
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    success_count = 0
+    for result in results:
+        if isinstance(result, Exception) or result is None:
+            continue
+
+        port_number, rss_type, xml_text = result
+        port_id = port_map.get(port_number)
+        if port_id is None:
+            continue
+
+        lane_name_map = next(m for t, m in rss_types if t == rss_type)
+
+        try:
+            root = ElementTree.fromstring(xml_text)
+        except ElementTree.ParseError:
+            continue
+
+        pub_date_el = root.find(".//pubDate")
+        cbp_updated = parse_rss_timestamp(pub_date_el.text) if pub_date_el is not None else None
+
+        for item in root.findall(".//item"):
+            desc_el = item.find("description")
+            if desc_el is None:
+                continue
+
+            full_text = "".join(desc_el.itertext())
+            if not full_text.strip():
+                continue
+
+            parsed_lanes = _parse_rss_description(full_text, lane_name_map)
+            for lane_data in parsed_lanes:
+                lane_type_id = lane_map.get(lane_data["lane_code"])
+                if lane_type_id is None:
+                    continue
+
+                observations.append({
+                    "observed_at": now,
+                    "port_id": port_id,
+                    "lane_type_id": lane_type_id,
+                    "wait_minutes": lane_data["wait_minutes"],
+                    "delay_minutes": None,
+                    "lanes_open": lane_data["lanes_open"],
+                    "is_closed": lane_data["is_closed"],
+                    "source": "cbp_rss",
+                    "cbp_updated_at": cbp_updated,
+                    "max_lanes": lane_data["max_lanes"],
+                    "update_time": lane_data["update_time"],
+                })
+                success_count += 1
+
+    log.info("rss_fetch_complete", observations=success_count, ports=len(port_numbers))
+    return observations
 
 async def store_observations(observations: list[dict]) -> int:
     """Store normalized observations, deduplicating against recent data."""
@@ -231,7 +448,18 @@ async def store_observations(observations: list[dict]) -> int:
     stored = 0
     async with AsyncSessionLocal() as session:
         for obs in observations:
-            # Deduplicate: skip if we already have this port+lane+cbp_timestamp
+            # Always update live cache so it stays fresh even when deduplicating
+            await cache_live_wait(obs["port_id"], obs["lane_type_id"], {
+                "waitMinutes": obs["wait_minutes"],
+                "lanesOpen": obs["lanes_open"],
+                "isClosed": obs["is_closed"],
+                "updatedAt": obs["observed_at"].isoformat(),
+                "cbpUpdatedAt": obs["cbp_updated_at"].isoformat() if obs["cbp_updated_at"] else None,
+                "maxLanes": obs.get("max_lanes"),
+                "updateTime": obs.get("update_time"),
+            })
+
+            # Deduplicate: skip DB insert if we already have this port+lane+cbp_timestamp
             if obs["cbp_updated_at"]:
                 existing = await session.execute(
                     select(WaitTimeObservation).where(
@@ -245,21 +473,27 @@ async def store_observations(observations: list[dict]) -> int:
                 if existing.scalar_one_or_none():
                     continue
 
-            session.add(WaitTimeObservation(**obs))
+            db_obs = {k: v for k, v in obs.items() if k not in ("max_lanes", "update_time")}
+            session.add(WaitTimeObservation(**db_obs))
             stored += 1
-
-            # Update live cache (graceful — won't crash if Redis is down)
-            await cache_live_wait(obs["port_id"], obs["lane_type_id"], {
-                "waitMinutes": obs["wait_minutes"],
-                "lanesOpen": obs["lanes_open"],
-                "isClosed": obs["is_closed"],
-                "updatedAt": obs["observed_at"].isoformat(),
-                "cbpUpdatedAt": obs["cbp_updated_at"].isoformat() if obs["cbp_updated_at"] else None,
-            })
 
         await session.commit()
 
     return stored
+
+def _get_json_age_seconds(records: list[dict]) -> Optional[float]:
+    now = datetime.now(timezone.utc)
+    timestamps = []
+    for r in records:
+        ts = parse_cbp_timestamp(r.get("date", ""), r.get("time", ""))
+        if ts:
+            timestamps.append(ts)
+
+    if not timestamps:
+        return None
+
+    newest = max(timestamps)
+    return (now - newest).total_seconds()
 
 
 async def run_ingestion():
@@ -279,23 +513,44 @@ async def run_ingestion():
 
         log.info("ingestion_maps_loaded", ports=len(port_map), lanes=len(lane_map))
 
-        # TODO: could also support Canadian border crossings eventually
         mx_records = [r for r in raw_data if r.get("border") == "Mexican Border"]
         log.info("ingestion_filtered", total=len(raw_data), mexican_border=len(mx_records))
 
-        all_observations = []
-        for record in mx_records:
-            observations = normalize_cbp_record(record, port_map, lane_map)
-            all_observations.extend(observations)
+        json_age = _get_json_age_seconds(mx_records)
+        json_is_stale = json_age is None or json_age > STALE_THRESHOLD.total_seconds()
 
+        if json_is_stale:
+            age_str = f"{json_age / 3600:.1f}h" if json_age else "unknown"
+            log.warning(
+                "json_api_stale_falling_back_to_rss",
+                json_age_seconds=json_age,
+                json_age_human=age_str,
+                threshold_seconds=STALE_THRESHOLD.total_seconds(),
+            )
+            port_numbers = list(port_map.keys())
+            all_observations = await fetch_cbp_rss_data(port_numbers, port_map, lane_map)
+        else:
+            log.info("json_api_fresh", json_age_seconds=json_age)
+            all_observations = []
+            for record in mx_records:
+                observations = normalize_cbp_record(record, port_map, lane_map)
+                all_observations.extend(observations)
+
+        source = "cbp_rss" if json_is_stale else "cbp_api"
         stored = await store_observations(all_observations)
         log.info(
             "ingestion_complete",
+            source=source,
             raw_records=len(mx_records),
             observations=len(all_observations),
             stored=stored,
         )
-        await set_ingestion_status(success=True, record_count=stored)
+        await set_ingestion_status(
+            success=True,
+            record_count=stored,
+            source=source,
+            json_age_seconds=json_age,
+        )
 
     except Exception as e:
         log.error("ingestion_error", error=str(e))

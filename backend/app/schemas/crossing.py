@@ -9,8 +9,10 @@ class LaneWaitTime(BaseModel):
     laneTypeLabel: str
     waitMinutes: Optional[int] = None
     lanesOpen: Optional[int] = None
+    maxLanes: Optional[int] = None
     isClosed: bool = False
     updatedAt: Optional[datetime] = None
+    updateTime: Optional[str] = None
 
 
 class CrossingSummary(BaseModel):

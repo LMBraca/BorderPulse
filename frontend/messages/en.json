@@ -13,7 +13,10 @@
     "minsAgo": "{mins}m ago",
     "hoursAgo": "{hrs}h ago",
     "stale": "Stale",
-    "perDay": "/day"
+    "perDay": "/day",
+    "cbpStale": "CBP data hasn't updated in {time}. Showing last known wait times.",
+    "daysAgo": "{days}d {hrs}h",
+    "cbpNoData": "No data available from CBP. Wait times may be unavailable."
   },
   "nav": {
     "home": "Home",
@@ -40,7 +43,8 @@
     "notFound": "Crossing not found",
     "goBack": "Go back",
     "weather": "Weather",
-    "lanesOpen": "{count} {count, plural, one {lane} other {lanes}} open"
+    "lanesOpen": "{count} {count, plural, one {lane} other {lanes}} open",
+    "lanesOfMax": "{open} of {max} lanes open"
   },
   "lanes": {
     "standard_vehicle": "Standard",

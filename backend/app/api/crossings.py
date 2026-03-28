@@ -51,7 +51,7 @@ async def get_latest_from_db(
     db: AsyncSession, lane_map: dict[int, LaneType]
 ) -> dict[int, dict[int, dict]]:
     """When Redis is empty, grab the latest observation per port+lane directly from PG."""
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=1)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
 
     # Subquery: latest observed_at per (port, lane)
     latest_sq = (
@@ -85,6 +85,7 @@ async def get_latest_from_db(
             "lanesOpen": obs.lanes_open,
             "isClosed": obs.is_closed,
             "updatedAt": obs.observed_at.isoformat(),
+            "cbpUpdatedAt": obs.cbp_updated_at.isoformat() if obs.cbp_updated_at else None,
         }
     return result
 
@@ -139,7 +140,7 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
         for lane_id, lane in lanes.items():
             live = port_live.get(lane_id, {})
             wait = live.get("waitMinutes")
-            updated = live.get("updatedAt")
+            updated = live.get("cbpUpdatedAt") or live.get("updatedAt")
 
             lane_waits.append(LaneWaitTime(
                 laneType=lane.code,
@@ -147,8 +148,10 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
                 laneTypeLabel=lane.name_en,
                 waitMinutes=wait,
                 lanesOpen=live.get("lanesOpen"),
+                maxLanes=live.get("maxLanes"),
                 isClosed=live.get("isClosed", False),
                 updatedAt=updated,
+                updateTime=live.get("updateTime"),
             ))
 
             if updated and (last_updated is None or updated > str(last_updated or "")):
@@ -237,8 +240,10 @@ async def get_crossing(crossing_id: int, db: AsyncSession = Depends(get_db)):
                 laneTypeLabel=lane.name_en,
                 waitMinutes=live.get("waitMinutes"),
                 lanesOpen=live.get("lanesOpen"),
+                maxLanes=live.get("maxLanes"),
                 isClosed=live.get("isClosed", False),
                 updatedAt=live.get("updatedAt"),
+                updateTime=live.get("updateTime"),
             ))
         else:
             lane_waits.append(LaneWaitTime(
@@ -247,8 +252,8 @@ async def get_crossing(crossing_id: int, db: AsyncSession = Depends(get_db)):
                 laneTypeLabel=lane.name_en,
             ))
 
-    # Get recent 24h history
-    cutoff = datetime.now(timezone.utc) - timedelta(hours=24)
+    # Get recent 48h history (wide enough to survive CBP data stalls)
+    cutoff = datetime.now(timezone.utc) - timedelta(hours=48)
     history_result = await db.execute(
         select(
             WaitTimeObservation.observed_at,

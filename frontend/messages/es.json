@@ -13,7 +13,10 @@
     "minsAgo": "hace {mins}m",
     "hoursAgo": "hace {hrs}h",
     "stale": "Desactualizado",
-    "perDay": "/dia"
+    "perDay": "/dia",
+    "cbpStale": "Los datos de CBP no se han actualizado en {time}. Mostrando ultimos tiempos conocidos.",
+    "daysAgo": "{days}d {hrs}h",
+    "cbpNoData": "No hay datos disponibles de CBP. Los tiempos de espera pueden no estar disponibles."
   },
   "nav": {
     "home": "Inicio",
@@ -40,7 +43,8 @@
     "notFound": "Cruce no encontrado",
     "goBack": "Volver",
     "weather": "Clima",
-    "lanesOpen": "{count} {count, plural, one {carril} other {carriles}} abiertos"
+    "lanesOpen": "{count} {count, plural, one {carril} other {carriles}} abiertos",
+    "lanesOfMax": "{open} de {max} carriles abiertos"
   },
   "lanes": {
     "standard_vehicle": "Estandar",

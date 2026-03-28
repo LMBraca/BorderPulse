@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     # CBP API
     cbp_api_url: str = "https://bwt.cbp.gov/api/waittimes"
+    cbp_rss_base_url: str = "https://bwt.cbp.gov/api/bwtRss/rssbyportnum/HTML"
     ingestion_interval_seconds: int = 300
 
     # App
