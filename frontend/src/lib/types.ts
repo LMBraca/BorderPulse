@@ -4,8 +4,10 @@ export interface LaneWaitTime {
   laneTypeLabel: string;
   waitMinutes: number | null;
   lanesOpen: number | null;
+  maxLanes: number | null;
   isClosed: boolean;
   updatedAt: string | null;
+  updateTime: string | null;
 }
 
 export interface CrossingSummary {

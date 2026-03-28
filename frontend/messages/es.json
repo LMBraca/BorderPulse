@@ -43,7 +43,8 @@
     "notFound": "Cruce no encontrado",
     "goBack": "Volver",
     "weather": "Clima",
-    "lanesOpen": "{count} {count, plural, one {carril} other {carriles}} abiertos"
+    "lanesOpen": "{count} {count, plural, one {carril} other {carriles}} abiertos",
+    "lanesOfMax": "{open} de {max} carriles abiertos"
   },
   "lanes": {
     "standard_vehicle": "Estandar",

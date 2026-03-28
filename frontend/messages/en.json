@@ -43,7 +43,8 @@
     "notFound": "Crossing not found",
     "goBack": "Go back",
     "weather": "Weather",
-    "lanesOpen": "{count} {count, plural, one {lane} other {lanes}} open"
+    "lanesOpen": "{count} {count, plural, one {lane} other {lanes}} open",
+    "lanesOfMax": "{open} of {max} lanes open"
   },
   "lanes": {
     "standard_vehicle": "Standard",

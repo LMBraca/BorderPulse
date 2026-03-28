@@ -152,6 +152,11 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
                       >
                         {lane.isClosed ? tc("closed") : `${lane.waitMinutes}m`}
                       </span>
+                      {lane.lanesOpen != null && lane.maxLanes != null && (
+                        <span className="text-[10px] text-slate-600 tabular-nums">
+                          {lane.lanesOpen}/{lane.maxLanes}
+                        </span>
+                      )}
                     </div>
                   );
                 })}

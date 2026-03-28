@@ -148,8 +148,10 @@ async def list_crossings(db: AsyncSession = Depends(get_db)):
                 laneTypeLabel=lane.name_en,
                 waitMinutes=wait,
                 lanesOpen=live.get("lanesOpen"),
+                maxLanes=live.get("maxLanes"),
                 isClosed=live.get("isClosed", False),
                 updatedAt=updated,
+                updateTime=live.get("updateTime"),
             ))
 
             if updated and (last_updated is None or updated > str(last_updated or "")):
@@ -238,8 +240,10 @@ async def get_crossing(crossing_id: int, db: AsyncSession = Depends(get_db)):
                 laneTypeLabel=lane.name_en,
                 waitMinutes=live.get("waitMinutes"),
                 lanesOpen=live.get("lanesOpen"),
+                maxLanes=live.get("maxLanes"),
                 isClosed=live.get("isClosed", False),
                 updatedAt=live.get("updatedAt"),
+                updateTime=live.get("updateTime"),
             ))
         else:
             lane_waits.append(LaneWaitTime(
