@@ -221,7 +221,6 @@ def normalize_cbp_record(record: dict, port_map: dict, lane_map: dict) -> list[d
         closed = is_closed(operational_status, lanes_open_str)
         wait_min = parse_delay_minutes(delay_str)
         lanes_open = parse_lanes_open(lanes_open_str)
-        max_lanes = parse_max_lanes(parent_group.get("maximum_lanes"))
         update_time = str(lane_data.get("update_time", "")).strip() or None
 
         # "no delay" with 0 delay_minutes means 0 wait
@@ -238,7 +237,7 @@ def normalize_cbp_record(record: dict, port_map: dict, lane_map: dict) -> list[d
             "is_closed": closed,
             "source": "cbp_api",
             "cbp_updated_at": cbp_updated,
-            "max_lanes": max_lanes,
+            "max_lanes": None,
             "update_time": update_time,
         })
 
@@ -313,8 +312,6 @@ def _parse_rss_description(
     lane_name_map: dict[str, str],
 ) -> list[dict]:
     lanes = []
-    max_lanes_match = _RSS_MAX_LANES_RE.search(description)
-    max_lanes = int(max_lanes_match.group(1)) if max_lanes_match else None
 
     for m in _RSS_LANE_RE.finditer(description):
         lane_name = m.group(1).lower()
@@ -328,7 +325,7 @@ def _parse_rss_description(
                 "wait_minutes": delay,
                 "lanes_open": lanes_open,
                 "is_closed": False,
-                "max_lanes": max_lanes,
+                "max_lanes": None,
                 "update_time": f"At {update_time}" if update_time else None,
             })
 
@@ -343,7 +340,7 @@ def _parse_rss_description(
                 "wait_minutes": 0,
                 "lanes_open": lanes_open,
                 "is_closed": False,
-                "max_lanes": max_lanes,
+                "max_lanes": None,
                 "update_time": f"At {update_time}" if update_time else None,
             })
 
@@ -356,7 +353,7 @@ def _parse_rss_description(
                 "wait_minutes": None,
                 "lanes_open": 0,
                 "is_closed": True,
-                "max_lanes": max_lanes,
+                "max_lanes": None,
                 "update_time": None,
             })
 

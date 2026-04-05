@@ -206,9 +206,7 @@ export default function CrossingDetailPage() {
                   </span>
                   {primaryLane?.lanesOpen != null && !heroIsClosed && (
                     <span className="text-[11px] text-slate-600">
-                      {primaryLane.maxLanes != null
-                        ? t("lanesOfMax", { open: primaryLane.lanesOpen, max: primaryLane.maxLanes })
-                        : t("lanesOpen", { count: primaryLane.lanesOpen })}
+                      {t("lanesOpen", { count: primaryLane.lanesOpen })}
                     </span>
                   )}
                   {primaryLane?.updateTime && (
