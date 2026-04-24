@@ -46,7 +46,7 @@ export default function ExchangeRate() {
     const fmt = (d: Date) => d.toISOString().slice(0, 10);
 
     fetch(
-      `https://api.frankfurter.app/${fmt(weekAgo)}..${fmt(today)}?from=USD&to=MXN`
+      `https://api.frankfurter.dev/v1/${fmt(weekAgo)}..${fmt(today)}?from=USD&to=MXN`
     )
       .then((r) => r.json())
       .then((data) => {

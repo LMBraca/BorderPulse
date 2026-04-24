@@ -114,22 +114,25 @@ export default function WaitTimeChart({
     });
 
   const today = new Date();
-  const futureHours = predictions.filter((h) => h.hour >= currentHour);
-  const predictionPoints: ChartPoint[] = futureHours.map((h) => {
-    const d = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h.hour, 0, 0);
-    return {
-      time: d.getTime(),
-      label: formatHour(h.hour),
-      actual: null,
-      predicted: h.predictedWait,
-      p25: h.p25Wait,
-      p75: h.p75Wait,
-      confidence: h.confidence,
-    };
-  });
+  const hasActual = actualPoints.length > 0;
+  const predictionPoints: ChartPoint[] = predictions
+    .map((h) => {
+      const d = new Date(today.getFullYear(), today.getMonth(), today.getDate(), h.hour, 0, 0);
+      return {
+        time: d.getTime(),
+        label: formatHour(h.hour),
+        actual: null,
+        predicted: h.predictedWait,
+        p25: h.p25Wait,
+        p75: h.p75Wait,
+        confidence: h.confidence,
+      };
+    })
+    .filter((p) => (hasActual ? p.time > now : p.time >= now - 3600_000))
+    .sort((a, b) => a.time - b.time);
 
   const bridgePoints: ChartPoint[] = [];
-  if (actualPoints.length > 0 && predictionPoints.length > 0) {
+  if (hasActual && predictionPoints.length > 0) {
     const lastActual = actualPoints[actualPoints.length - 1];
     bridgePoints.push({
       time: now,
@@ -161,14 +164,29 @@ export default function WaitTimeChart({
 
   return (
     <div>
-      {bestTime && (
-        <div className="rounded-lg px-3 py-2.5 mb-3 bg-white/[0.03] border border-subtle overflow-hidden">
-          <p className="text-sm text-slate-300 break-words">{bestTime.message}</p>
-          {bestTime.confidence === "low" && (
-            <p className="text-xs text-slate-600 mt-1">{t("lowConfidenceNote")}</p>
-          )}
-        </div>
-      )}
+      {bestTime && bestTime.bestHour != null && bestTime.bestWait != null && (() => {
+        const current = bestTime.currentWait ?? bestTime.bestWait!;
+        const savings = current - bestTime.bestWait!;
+        const bestMessage =
+          savings < 5
+            ? t("bestStable")
+            : bestTime.bestHour! <= currentHour
+              ? t("bestNow")
+              : t("bestLater", {
+                  time: formatHour(bestTime.bestHour!),
+                  wait: Math.round(bestTime.bestWait!),
+                  savings: Math.round(savings),
+                  current: Math.round(current),
+                });
+        return (
+          <div className="rounded-lg px-3 py-2.5 mb-3 bg-white/[0.03] border border-subtle overflow-hidden">
+            <p className="text-sm text-slate-300 break-words">{bestMessage}</p>
+            {bestTime.confidence === "low" && (
+              <p className="text-xs text-slate-600 mt-1">{t("lowConfidenceNote")}</p>
+            )}
+          </div>
+        );
+      })()}
 
       <div className="h-44 sm:h-52">
         <ResponsiveContainer width="100%" height="100%">

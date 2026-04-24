@@ -3,9 +3,17 @@
 import { useState, useEffect } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { useRouter, usePathname } from "@/i18n/navigation";
-import { Info, Globe, Github, Coffee, Car, Languages, MessageCircle, CheckCircle } from "lucide-react";
+import { Info, Globe, Github, Coffee, Car, Languages, MessageCircle, CheckCircle, Thermometer } from "lucide-react";
 import { BORDER_TIMEZONES, getUserTimezone, setUserTimezone } from "@/lib/timezone";
-import { LANE_CODES, getPreferredLane, setPreferredLane, type LaneCode } from "@/lib/preferences";
+import {
+  LANE_CODES,
+  getPreferredLane,
+  setPreferredLane,
+  getTemperatureUnit,
+  setTemperatureUnit,
+  type LaneCode,
+  type TemperatureUnit,
+} from "@/lib/preferences";
 
 type FeedbackType = "bug" | "feature" | "other";
 
@@ -19,6 +27,7 @@ export default function SettingsPage() {
 
   const [tz, setTz] = useState("America/Tijuana");
   const [lane, setLane] = useState<LaneCode>("standard_vehicle");
+  const [tempUnit, setTempUnit] = useState<TemperatureUnit>("fahrenheit");
 
   const [fbType, setFbType] = useState<FeedbackType>("bug");
   const [fbMessage, setFbMessage] = useState("");
@@ -29,7 +38,13 @@ export default function SettingsPage() {
   useEffect(() => {
     setTz(getUserTimezone());
     setLane(getPreferredLane());
+    setTempUnit(getTemperatureUnit());
   }, []);
+
+  const handleTempUnitChange = (value: TemperatureUnit) => {
+    setTempUnit(value);
+    setTemperatureUnit(value);
+  };
 
   const handleFeedbackSubmit = async () => {
     if (!fbMessage.trim()) return;
@@ -132,6 +147,25 @@ export default function SettingsPage() {
                   {tl(code)}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Temperature unit */}
+          <div className="rounded-xl bg-card border border-subtle p-4">
+            <div className="flex items-center gap-3 mb-3">
+              <Thermometer size={18} className="text-slate-400" />
+              <div>
+                <h3 className="font-display font-semibold text-sm text-white">{t("temperatureUnit")}</h3>
+                <p className="text-xs text-slate-600 mt-0.5">{t("temperatureUnitDesc")}</p>
+              </div>
+            </div>
+            <select
+              value={tempUnit}
+              onChange={(e) => handleTempUnitChange(e.target.value as TemperatureUnit)}
+              className="w-full px-3 py-2 rounded-lg text-sm bg-white/[0.04] border border-subtle text-white focus:outline-none focus:border-slate-600 transition-colors"
+            >
+              <option value="fahrenheit" className="bg-navy-800">°F (Fahrenheit)</option>
+              <option value="celsius" className="bg-navy-800">°C (Celsius)</option>
             </select>
           </div>
 

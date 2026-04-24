@@ -85,7 +85,10 @@
     "reliable": "Reliable",
     "moderate": "Moderate",
     "limitedData": "Limited data",
-    "lowConfidenceNote": "Based on limited data — treat as a rough estimate"
+    "lowConfidenceNote": "Based on limited data — treat as a rough estimate",
+    "bestStable": "Wait times look steady for the next several hours",
+    "bestNow": "Wait times are near their lowest right now",
+    "bestLater": "Typically lower around {time} (~{wait} min). Could save ~{savings} min vs. current {current} min."
   },
   "weather": {
     "0": "Clear",
@@ -157,6 +160,8 @@
     "timezoneDesc": "Used for prediction times and \"best time to cross\"",
     "crossingType": "Crossing type",
     "crossingTypeDesc": "Wait time shown on crossing cards",
+    "temperatureUnit": "Temperature unit",
+    "temperatureUnitDesc": "Units used for the weather widget",
     "language": "Language",
     "languageDesc": "App language and URL prefix",
     "about": "About",

@@ -85,7 +85,10 @@
     "reliable": "Confiable",
     "moderate": "Moderado",
     "limitedData": "Datos limitados",
-    "lowConfidenceNote": "Basado en datos limitados — tomar como estimacion aproximada"
+    "lowConfidenceNote": "Basado en datos limitados — tomar como estimacion aproximada",
+    "bestStable": "Los tiempos de espera se ven estables para las proximas horas",
+    "bestNow": "Los tiempos de espera estan cerca de su minimo ahora mismo",
+    "bestLater": "Generalmente mas bajo a las {time} (~{wait} min). Podrias ahorrar ~{savings} min vs. los {current} min actuales."
   },
   "weather": {
     "0": "Despejado",
@@ -157,6 +160,8 @@
     "timezoneDesc": "Usado para predicciones y \"mejor hora para cruzar\"",
     "crossingType": "Tipo de cruce",
     "crossingTypeDesc": "Tiempo de espera mostrado en las tarjetas",
+    "temperatureUnit": "Unidad de temperatura",
+    "temperatureUnitDesc": "Unidades usadas en el widget del clima",
     "language": "Idioma",
     "languageDesc": "Idioma de la aplicacion y prefijo de URL",
     "about": "Acerca de",
