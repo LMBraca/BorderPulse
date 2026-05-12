@@ -9,6 +9,8 @@ class HourlyPrediction(BaseModel):
     p75Wait: Optional[float] = None
     confidence: str  # "low", "medium", "high"
     sampleCount: int = 0
+    nEff: Optional[float] = None
+    nowcasted: Optional[bool] = None
 
 
 class BestTimeSuggestion(BaseModel):
@@ -25,3 +27,4 @@ class PredictionResponse(BaseModel):
     date: str
     hourly: list[HourlyPrediction] = []
     bestTime: Optional[BestTimeSuggestion] = None
+    isHoliday: Optional[bool] = None

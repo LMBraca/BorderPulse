@@ -52,6 +52,8 @@ export interface HourlyPrediction {
   p75Wait: number | null;
   confidence: "low" | "medium" | "high";
   sampleCount: number;
+  nEff?: number | null;
+  nowcasted?: boolean | null;
 }
 
 export interface BestTimeSuggestion {
@@ -68,6 +70,7 @@ export interface PredictionResponse {
   date: string;
   hourly: HourlyPrediction[];
   bestTime: BestTimeSuggestion | null;
+  isHoliday?: boolean | null;
 }
 
 export type WaitStatus = "green" | "yellow" | "red" | "unknown" | "closed";

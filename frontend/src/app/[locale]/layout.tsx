@@ -23,6 +23,9 @@ export async function generateMetadata({
       statusBarStyle: "black-translucent" as const,
       title: "BorderPulse",
     },
+    itunes: {
+      appId: "6762310342",
+    },
   };
 }
 

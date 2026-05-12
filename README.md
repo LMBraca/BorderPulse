@@ -58,7 +58,14 @@ Redis caches live wait times so the API responds fast. The app works without it 
 
 The backend polls CBP every 5 minutes, normalizes the data, deduplicates it, and stores observations in a TimescaleDB hypertable. The API serves live wait times from Redis, and the frontend auto-refreshes every 60 seconds.
 
-Predictions use day-of-week × hour-of-day medians computed from the last 90 days of observations. They need about a week of data collection before they're useful.
+Predictions are kernel-smoothed weighted medians over the last 90 days of observations. Each historical sample contributes weight ≈ `recency × hour_kernel × dow_kernel × holiday_match`:
+
+- **Recency**: exponential decay with a 21-day half-life, so recent patterns dominate.
+- **Hour kernel**: Gaussian over cyclic hour distance (σ=1h) — hour 14 borrows strength from 13 and 15.
+- **Day-of-week kernel**: same dow weighted 1.0; adjacent same-group (e.g., Mon↔Tue) 0.45; cross-group (weekday↔weekend) 0.07.
+- **Holiday match**: predictions for non-holidays downweight observations from holidays (and vice versa). Major US/MX holidays and Semana Santa are detected automatically; the response includes an `isHoliday` flag.
+
+Confidence is set by the Kish effective sample size and the IQR-to-prediction ratio. For "today", the next 3 hours are nowcast-blended with the current live wait — if the border is running 30 min above baseline right now, the next hour gets +27, two hours out +20, decaying back to baseline.
 
 ---
 
