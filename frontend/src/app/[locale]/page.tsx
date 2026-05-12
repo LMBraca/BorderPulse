@@ -3,11 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import CrossingCard from "@/components/CrossingCard";
-import FreshnessIndicator from "@/components/FreshnessIndicator";
 import { getCrossings } from "@/lib/api";
 import { getFavorites } from "@/lib/favorites";
 import type { CrossingSummary } from "@/lib/types";
-import { Search, X, RefreshCw, AlertTriangle } from "lucide-react";
+import { Search, RefreshCw, AlertTriangle } from "lucide-react";
 
 export default function HomePage() {
   const t = useTranslations("home");
@@ -90,44 +89,61 @@ export default function HomePage() {
   });
 
   return (
-    <div className="flex flex-col min-h-dvh pb-24 lg:pb-0">
-      <header className="sticky top-0 z-40 bg-navy-950/95 backdrop-blur-lg border-b border-subtle px-4 lg:px-8 pt-4 pb-3">
-        <div className="max-w-5xl mx-auto">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <h1 className="font-display font-bold text-lg text-white tracking-tight lg:hidden">
+    <div className="flex flex-col min-h-dvh pb-[110px] lg:pb-10">
+      <header
+        className="sticky top-0 z-40 border-b border-subtle"
+        style={{ background: "rgba(6,14,26,0.96)", backdropFilter: "blur(16px)", padding: "14px 16px 12px" }}
+      >
+        <div className="max-w-[1200px] mx-auto lg:px-7">
+          <div className="flex items-center gap-3 mb-2.5">
+            {/* Mobile: wordmark + live dot */}
+            <div className="lg:hidden">
+              <div className="flex items-center gap-1.5 mb-0.5">
+                <span className="animate-live-pulse w-1.5 h-1.5 rounded-full bg-status-green inline-block" />
+                <span className="text-[10px] font-bold tracking-[0.5px]" style={{ color: "oklch(72% 0.14 148)" }}>LIVE</span>
+              </div>
+              <h1 className="font-display font-bold text-[20px] text-[#F1F5F9]" style={{ letterSpacing: -0.5 }}>
                 {tc("appName")}
               </h1>
-              <h1 className="font-display font-bold text-lg text-white tracking-tight hidden lg:block">
-                {t("allCrossings")}
-              </h1>
-              <FreshnessIndicator lastUpdated={lastFetch} dataLastUpdated={dataLastUpdated} />
             </div>
+            {/* Desktop: section heading */}
+            <h1 className="hidden lg:block font-display font-bold text-[17px] text-[#F1F5F9] flex-1" style={{ letterSpacing: -0.3 }}>
+              {t("allCrossings")}
+            </h1>
+            <div className="flex-1 lg:hidden" />
             <button
               onClick={handleRefresh}
               disabled={refreshing}
-              className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1 text-[11px] text-[#475569] rounded-lg disabled:opacity-50 transition-colors"
+              style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)", padding: "5px 10px", borderRadius: 8 }}
             >
-              <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+              <RefreshCw size={12} className={refreshing ? "animate-spin" : ""} />
               {tc("refresh")}
             </button>
           </div>
 
-          <div className="relative lg:max-w-sm">
-            <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-600" />
+          <div className="relative lg:max-w-[320px]">
+            <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "#334155" }} />
             <input
               type="text"
               placeholder={t("searchPlaceholder")}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-8 py-2 rounded-lg text-sm bg-white/[0.04] border border-subtle text-white placeholder:text-slate-600 focus:outline-none focus:border-slate-600 transition-colors"
+              className="w-full text-[13px] text-[#94A3B8] placeholder:text-[#334155] focus:outline-none"
+              style={{
+                background: "rgba(255,255,255,0.04)",
+                border: "1px solid rgba(255,255,255,0.07)",
+                borderRadius: 10,
+                padding: "8px 30px 8px 32px",
+              }}
             />
             {search && (
               <button
                 onClick={() => setSearch("")}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-600"
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[12px]"
+                style={{ color: "#334155", background: "none", border: "none", cursor: "pointer" }}
               >
-                <X size={13} />
+                ✕
               </button>
             )}
           </div>
@@ -153,22 +169,23 @@ export default function HomePage() {
         </div>
       )}
 
-      <main className="flex-1 px-4 lg:px-8">
-        <div className="max-w-5xl mx-auto">
+      <main className="flex-1 px-4 lg:px-7">
+        <div className="max-w-[1200px] mx-auto">
           {loading && (
             <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2 mt-4">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="skeleton h-24 rounded-xl" />
+                <div key={i} className="skeleton h-[88px] rounded-card" />
               ))}
             </div>
           )}
 
           {error && (
             <div className="mt-12 text-center">
-              <p className="text-slate-500 text-sm">{t("loadError")}</p>
+              <p className="text-[#475569] text-sm">{t("loadError")}</p>
               <button
                 onClick={fetchData}
-                className="mt-3 px-4 py-2 rounded-lg bg-white/[0.05] text-slate-300 text-sm font-medium hover:bg-white/[0.08] transition-colors"
+                className="mt-3 px-4 py-2 text-[#94A3B8] text-sm font-medium transition-colors"
+                style={{ background: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 8 }}
               >
                 {tc("retry")}
               </button>
@@ -178,11 +195,11 @@ export default function HomePage() {
           {!loading && !error && (
             <>
               {favorites.length > 0 && (
-                <section className="mt-4">
-                  <h2 className="font-display font-semibold text-[11px] text-slate-500 uppercase tracking-widest mb-2 pl-1">
-                    {t("favorites")}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-1.5">
+                <section className="mt-4 mb-[18px]">
+                  <p className="text-[10px] font-bold text-[#334155] uppercase mb-2 pl-0.5" style={{ letterSpacing: 1.2 }}>
+                    ★ {t("favorites")}
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
                     {favorites.map((c) => (
                       <CrossingCard key={c.id} crossing={c} onFavToggle={refreshFavs} />
                     ))}
@@ -191,11 +208,11 @@ export default function HomePage() {
               )}
 
               {sortedStates.map((state) => (
-                <section key={state} className="mt-5">
-                  <h2 className="font-display font-semibold text-[11px] text-slate-500 uppercase tracking-widest mb-2 pl-1">
+                <section key={state} className="mb-[18px]">
+                  <p className="text-[10px] font-bold text-[#334155] uppercase mb-2 pl-0.5" style={{ letterSpacing: 1.2 }}>
                     {t(`states.${state}`) || state}
-                  </h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-1.5">
+                  </p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
                     {grouped[state].map((c) => (
                       <CrossingCard key={c.id} crossing={c} onFavToggle={refreshFavs} />
                     ))}
@@ -205,7 +222,7 @@ export default function HomePage() {
 
               {filtered.length === 0 && search && (
                 <div className="mt-16 text-center">
-                  <p className="text-slate-600 text-sm">
+                  <p className="text-[#334155] text-sm">
                     {t("noResults", { query: search })}
                   </p>
                 </div>

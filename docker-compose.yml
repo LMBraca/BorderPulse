@@ -67,6 +67,7 @@ services:
     volumes:
       - ./frontend/src:/app/src
       - ./frontend/public:/app/public
+      - ./frontend/messages:/app/messages
 
 volumes:
   pgdata:

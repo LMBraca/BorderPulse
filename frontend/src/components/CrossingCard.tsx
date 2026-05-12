@@ -8,9 +8,8 @@ import {
   STATUS_COLORS,
   MX_STATE_ABBR,
 } from "@/lib/types";
-import { Heart, ChevronRight, TrendingUp, TrendingDown, Minus } from "lucide-react";
+import { Heart, TrendingUp, TrendingDown } from "lucide-react";
 import { isFavorite, toggleFavorite } from "@/lib/favorites";
-import { CROSSING_VOLUMES, formatVolume } from "@/lib/volumes";
 import { getPreferredLane } from "@/lib/preferences";
 import { useState, useEffect } from "react";
 
@@ -20,9 +19,9 @@ interface CrossingCardProps {
 }
 
 const TREND_CONFIG = {
-  rising: { icon: TrendingUp, color: "#F87171", tKey: "rising" },
-  falling: { icon: TrendingDown, color: "#34D399", tKey: "falling" },
-  stable: { icon: Minus, color: "#94A3B8", tKey: "stable" },
+  rising: { icon: TrendingUp, color: "oklch(65% 0.17 25)" },
+  falling: { icon: TrendingDown, color: "oklch(72% 0.14 148)" },
+  stable: { icon: null, color: "" },
 } as const;
 
 export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProps) {
@@ -46,7 +45,6 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
   };
 
   const activeLanes = crossing.lanes.filter((l) => l.waitMinutes !== null || l.isClosed);
-  const hasData = activeLanes.length > 0;
 
   const preferred = activeLanes.find(
     (l) => l.laneType === preferredLane && !l.isClosed && l.waitMinutes !== null
@@ -68,8 +66,8 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
     ? getWaitStatus(headlineLane.waitMinutes, headlineLane.isClosed)
     : "unknown";
   const headlineColor = STATUS_COLORS[headlineStatus];
-  const volume = CROSSING_VOLUMES[crossing.name];
-  const trend = crossing.trend ? TREND_CONFIG[crossing.trend] : null;
+
+  const trend = crossing.trend && crossing.trend !== "stable" ? TREND_CONFIG[crossing.trend] : null;
 
   const formatAgo = (dateStr: string | null) => {
     if (!dateStr) return tc("noData");
@@ -78,95 +76,103 @@ export default function CrossingCard({ crossing, onFavToggle }: CrossingCardProp
     if (mins < 1) return tc("justNow");
     if (mins < 60) return tc("minsAgo", { mins });
     const hrs = Math.floor(diff / 3600000);
-    if (hrs < 24) return tc("hoursAgo", { hrs });
-    const days = Math.floor(hrs / 24);
-    return tc("daysAgo", { days, hrs: hrs % 24 });
+    return tc("hoursAgo", { hrs });
   };
 
   return (
     <Link href={`/crossing/${crossing.id}`} className="block group">
-      <div className="rounded-xl bg-card border border-subtle p-3.5 transition-colors group-active:bg-card-hover group-hover:bg-card-hover h-full flex flex-col">
+      <div
+        className="rounded-card border border-subtle flex flex-col transition-colors"
+        style={{
+          background: "#0C1B30",
+          padding: "12px 14px",
+          gap: 8,
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.background = "#0F2245")}
+        onMouseLeave={(e) => (e.currentTarget.style.background = "#0C1B30")}
+      >
+        {/* Top row */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex-1 min-w-0">
-            <h3 className="font-display font-semibold text-[15px] text-white truncate">
-              {crossing.name}
-            </h3>
-            <p className="text-xs text-slate-500 mt-0.5 truncate">
+            <div className="flex items-center gap-1.5 mb-0.5">
+              <span
+                className="font-display font-semibold text-[15px] text-[#F1F5F9] truncate"
+                style={{ letterSpacing: -0.3 }}
+              >
+                {crossing.name}
+              </span>
+              {trend && trend.icon && (
+                <trend.icon size={11} style={{ color: trend.color, flexShrink: 0 }} strokeWidth={2.5} />
+              )}
+            </div>
+            <p className="text-[11px] text-[#475569]">
               {crossing.cityMx}, {MX_STATE_ABBR[crossing.stateMx] ?? crossing.stateMx} &rarr;{" "}
               {crossing.cityUs}, {crossing.stateUs}
             </p>
           </div>
 
-          <div className="flex items-center gap-1.5 shrink-0">
-            {trend && <trend.icon size={14} style={{ color: trend.color }} />}
-            {headlineLane && headlineLane.waitMinutes !== null && (
+          <div className="flex items-center gap-2 shrink-0">
+            {/* Big wait number */}
+            {headlineLane && (
               <span
-                className="text-sm font-display font-semibold tabular-nums"
-                style={{ color: headlineColor }}
+                className="font-display tabular-nums"
+                style={{ color: headlineColor, fontWeight: 700, fontSize: 22 }}
               >
-                {headlineLane.waitMinutes} {tc("min")}
+                {headlineLane.isClosed
+                  ? <span style={{ fontSize: 14 }}>{tc("closed")}</span>
+                  : headlineLane.waitMinutes !== null
+                  ? (
+                    <>
+                      {headlineLane.waitMinutes}
+                      <span style={{ fontSize: 11.5, fontWeight: 500, color: "#334155", marginLeft: 1 }}>m</span>
+                    </>
+                  )
+                  : "—"}
               </span>
             )}
             <button
               onClick={handleFav}
-              className={`p-1 rounded-lg transition-colors ${
-                fav ? "text-red-400" : "text-slate-600 hover:text-slate-400"
-              }`}
+              className="p-0.5 transition-colors"
+              style={{ color: fav ? "oklch(65% 0.17 25)" : "#334155", fontSize: 15, lineHeight: 1, background: "none", border: "none", cursor: "pointer" }}
             >
-              <Heart size={14} className={fav ? "fill-current" : ""} />
+              {fav ? "♥" : "♡"}
             </button>
           </div>
         </div>
 
-        {volume && (
-          <div className="mt-1.5">
-            <span className="text-[10px] text-slate-600">
-              {formatVolume(volume.daily)}{tc("perDay")}
-            </span>
-          </div>
-        )}
-
-        <div className="mt-auto pt-2.5 mt-2.5 border-t border-subtle">
-          {hasData ? (
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex flex-wrap gap-x-3 gap-y-1 min-w-0">
-                {activeLanes.map((lane) => {
-                  const status = getWaitStatus(lane.waitMinutes, lane.isClosed);
-                  const color = STATUS_COLORS[status];
-                  let label: string;
-                  try {
-                    label = tl(lane.laneType);
-                  } catch {
-                    label = lane.laneTypeLabel;
-                  }
-                  return (
-                    <div key={lane.laneType} className="flex items-center gap-1 whitespace-nowrap">
-                      <span
-                        className="w-1.5 h-1.5 rounded-full shrink-0"
-                        style={{ backgroundColor: color }}
-                      />
-                      <span className="text-[11px] text-slate-500">{label}</span>
-                      <span
-                        className="text-[11px] font-semibold font-display tabular-nums"
-                        style={{ color }}
-                      >
-                        {lane.isClosed ? tc("closed") : `${lane.waitMinutes}m`}
-                      </span>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0">
-                <span className="text-[10px] text-slate-600 whitespace-nowrap">
-                  {formatAgo(crossing.lastUpdated)}
+        {/* Lane row */}
+        <div
+          className="flex items-center flex-wrap gap-2"
+          style={{ borderTop: "1px solid rgba(255,255,255,0.04)", paddingTop: 8 }}
+        >
+          {activeLanes.map((lane) => {
+            const status = getWaitStatus(lane.waitMinutes, lane.isClosed);
+            const color = STATUS_COLORS[status];
+            let label: string;
+            try {
+              label = tl(lane.laneType);
+            } catch {
+              label = lane.laneTypeLabel;
+            }
+            return (
+              <div key={lane.laneType} className="flex items-center gap-1">
+                <span
+                  className="rounded-full shrink-0"
+                  style={{ width: 6, height: 6, background: color, display: "block" }}
+                />
+                <span className="text-[11px] text-[#475569]">{label}</span>
+                <span
+                  className="text-[11px] font-semibold font-display tabular-nums"
+                  style={{ color }}
+                >
+                  {lane.isClosed ? tc("closed") : `${lane.waitMinutes}m`}
                 </span>
-                <ChevronRight size={12} className="text-slate-700" />
               </div>
-            </div>
-          ) : (
-            <span className="text-[11px] text-slate-600">{tc("noData")}</span>
-          )}
+            );
+          })}
+          <span className="text-[10px] text-[#334155] ml-auto">
+            {formatAgo(crossing.lastUpdated)}
+          </span>
         </div>
       </div>
     </Link>

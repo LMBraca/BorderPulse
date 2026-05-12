@@ -3,9 +3,7 @@ import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import "../globals.css";
 import AppShell from "@/components/AppShell";
-import { Analytics } from "@vercel/analytics/next";
 
 export async function generateMetadata({
   params,
@@ -22,6 +20,9 @@ export async function generateMetadata({
       capable: true,
       statusBarStyle: "black-translucent" as const,
       title: "BorderPulse",
+    },
+    itunes: {
+      appId: "6762310342",
     },
   };
 }
@@ -49,13 +50,8 @@ export default async function LocaleLayout({
   const messages = await getMessages();
 
   return (
-    <html lang={locale}>
-      <body className="antialiased">
-        <NextIntlClientProvider messages={messages}>
-          <AppShell>{children}</AppShell>
-        </NextIntlClientProvider>
-        <Analytics />
-      </body>
-    </html>
+    <NextIntlClientProvider messages={messages}>
+      <AppShell>{children}</AppShell>
+    </NextIntlClientProvider>
   );
 }

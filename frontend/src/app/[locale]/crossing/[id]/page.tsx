@@ -122,20 +122,25 @@ export default function CrossingDetailPage() {
   const heroColor = STATUS_COLORS[heroStatus];
 
   return (
-    <div className="min-h-dvh pb-24 lg:pb-0">
-      <header className="sticky top-0 z-40 bg-navy-950/95 backdrop-blur-lg border-b border-subtle px-4 py-3">
-        <div className="max-w-2xl mx-auto flex items-center gap-3">
+    <div className="min-h-dvh pb-[110px] lg:pb-10">
+      {/* Sticky header */}
+      <header
+        className="sticky top-0 z-40 border-b border-subtle"
+        style={{ background: "rgba(6,14,26,0.96)", backdropFilter: "blur(16px)", padding: "12px 16px" }}
+      >
+        <div className="max-w-2xl mx-auto flex items-center gap-2.5">
           <button
             onClick={() => router.back()}
-            className="p-1.5 -ml-1.5 rounded-lg text-slate-400 hover:text-white transition-colors shrink-0"
+            className="shrink-0 transition-colors"
+            style={{ color: "#475569", fontSize: 20, background: "none", border: "none", cursor: "pointer", padding: "4px 6px", borderRadius: 8, display: "flex", alignItems: "center" }}
           >
             <ArrowLeft size={20} />
           </button>
           <div className="flex-1 min-w-0">
-            <h1 className="font-display font-bold text-base text-white truncate">
+            <h1 className="font-display font-bold text-base text-[#F1F5F9] truncate" style={{ letterSpacing: -0.3 }}>
               {crossing.name}
             </h1>
-            <p className="text-xs text-slate-500 truncate">
+            <p className="text-[11px] text-[#475569] truncate">
               {crossing.cityMx},{" "}
               {MX_STATE_ABBR[crossing.stateMx] ?? crossing.stateMx} &rarr;{" "}
               {crossing.cityUs}, {crossing.stateUs}
@@ -143,18 +148,21 @@ export default function CrossingDetailPage() {
           </div>
           <button
             onClick={handleFav}
-            className={`p-2 rounded-lg transition-colors shrink-0 ${
-              fav ? "text-red-400" : "text-slate-600 hover:text-slate-400"
-            }`}
+            className="shrink-0 transition-colors"
+            style={{ color: fav ? "oklch(65% 0.17 25)" : "#334155", fontSize: 18, background: "none", border: "none", cursor: "pointer", padding: 4, lineHeight: 1 }}
           >
-            <Heart size={18} className={fav ? "fill-current" : ""} />
+            {fav ? "♥" : "♡"}
           </button>
         </div>
       </header>
 
       <main className="px-4">
         <div className="max-w-2xl mx-auto">
-          <div className="flex gap-1.5 py-3 overflow-x-auto no-scrollbar">
+          {/* Lane tabs — scrollable row */}
+          <div
+            className="flex gap-1.5 py-2.5 overflow-x-auto no-scrollbar"
+            style={{ borderBottom: "1px solid rgba(255,255,255,0.04)" }}
+          >
             {availableLanes.map((lane) => {
               const l = crossing.lanes.find((x) => x.laneType === lane);
               const s = getWaitStatus(l?.waitMinutes ?? null, l?.isClosed);
@@ -164,59 +172,64 @@ export default function CrossingDetailPage() {
                 <button
                   key={lane}
                   onClick={() => setSelectedLane(lane)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all border shrink-0 ${
-                    isActive
-                      ? "bg-white/[0.08] text-white border-white/[0.1]"
-                      : "text-slate-500 border-transparent hover:text-slate-400"
-                  }`}
+                  className="flex items-center gap-1.5 whitespace-nowrap shrink-0 text-xs font-medium transition-all"
+                  style={{
+                    padding: "7px 14px",
+                    borderRadius: 10,
+                    border: `1px solid ${isActive ? "rgba(255,255,255,0.12)" : "transparent"}`,
+                    background: isActive ? "rgba(255,255,255,0.07)" : "transparent",
+                    color: isActive ? "#F1F5F9" : "#475569",
+                    cursor: "pointer",
+                  }}
                 >
                   <span>{tl(lane)}</span>
                   {l && !l.isClosed && l.waitMinutes !== null && (
-                    <span
-                      className="font-display font-semibold tabular-nums"
-                      style={{ color: c }}
-                    >
+                    <span className="font-display font-bold tabular-nums" style={{ color: c }}>
                       {l.waitMinutes}m
                     </span>
                   )}
                   {l?.isClosed && (
-                    <span className="text-slate-600">{tc("closed")}</span>
+                    <span style={{ color: "#475569" }}>{tc("closed")}</span>
                   )}
                 </button>
               );
             })}
           </div>
 
-          <div className="rounded-xl bg-card border border-subtle p-4 mb-3 overflow-hidden">
-            <div className="flex items-baseline justify-between mb-4">
-              <div className="flex items-baseline gap-2">
+          {/* Hero wait-time card */}
+          <div
+            className="overflow-hidden mt-3 mb-3"
+            style={{
+              background: "#0C1B30",
+              border: "1px solid rgba(255,255,255,0.07)",
+              borderRadius: 18,
+              padding: "22px 22px 18px",
+            }}
+          >
+            <div className="flex items-end justify-between mb-5">
+              {/* Big number */}
+              <div className="flex items-baseline gap-3">
                 <span
-                  className="text-5xl sm:text-6xl font-display font-bold tabular-nums leading-none"
-                  style={{ color: heroColor }}
+                  className="font-display tabular-nums leading-none"
+                  style={{ color: heroColor, fontWeight: 800, fontSize: "clamp(76px, 10vw, 88px)" }}
                 >
                   {heroIsClosed ? "—" : heroMinutes !== null ? heroMinutes : "—"}
                 </span>
-                <div className="flex flex-col gap-0.5">
-                  <span className="text-slate-400 text-sm sm:text-base leading-none">
-                    {heroIsClosed
-                      ? tc("closed")
-                      : heroMinutes !== null
-                      ? tc("min")
-                      : tc("na")}
+                <div className="flex flex-col gap-1">
+                  <span className="font-display text-[18px] text-[#475569]">
+                    {heroIsClosed ? tc("closed") : heroMinutes !== null ? tc("min") : tc("na")}
                   </span>
                   {primaryLane?.lanesOpen != null && !heroIsClosed && (
-                    <span className="text-[11px] text-slate-600">
+                    <span className="text-[11px] text-[#334155]">
                       {t("lanesOpen", { count: primaryLane.lanesOpen })}
-                    </span>
-                  )}
-                  {primaryLane?.updateTime && (
-                    <span className="text-[10px] text-slate-600">
-                      {primaryLane.updateTime}
                     </span>
                   )}
                 </div>
               </div>
-              <FreshnessIndicator lastUpdated={primaryLane?.updatedAt ?? null} />
+              {/* Best time / freshness */}
+              <div className="text-right pb-1 shrink-0">
+                <FreshnessIndicator lastUpdated={primaryLane?.updatedAt ?? null} />
+              </div>
             </div>
 
             <div className="overflow-hidden">
@@ -230,27 +243,34 @@ export default function CrossingDetailPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-3">
-            <div className="rounded-xl bg-card border border-subtle p-3">
-              <p className="text-[10px] text-slate-600 uppercase tracking-wider font-medium mb-1.5">
+          {/* Info grid */}
+          <div className="grid grid-cols-2 gap-2.5 mb-3">
+            <div
+              className="overflow-hidden"
+              style={{ background: "#0C1B30", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "14px 16px" }}
+            >
+              <p className="text-[10px] text-[#334155] uppercase font-bold mb-2" style={{ letterSpacing: 0.8 }}>
                 {t("weather")}
               </p>
-              <WeatherWidget
-                latitude={crossing.latitude}
-                longitude={crossing.longitude}
-              />
+              <WeatherWidget latitude={crossing.latitude} longitude={crossing.longitude} />
             </div>
-            <div className="rounded-xl bg-card border border-subtle p-3 overflow-hidden">
+            <div
+              className="overflow-hidden"
+              style={{ background: "#0C1B30", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 14, padding: "14px 16px" }}
+            >
+              <p className="text-[10px] text-[#334155] uppercase font-bold mb-2" style={{ letterSpacing: 0.8 }}>
+                {t("exchangeRate") ?? "Exchange"}
+              </p>
               <ExchangeRate />
             </div>
           </div>
 
-          {/* Live traffic map */}
-          <div className="rounded-xl border border-subtle overflow-hidden mb-3 h-[300px] sm:aspect-square sm:h-auto">
-            <TrafficMap
-              latitude={crossing.latitude}
-              longitude={crossing.longitude}
-            />
+          {/* Traffic map */}
+          <div
+            className="overflow-hidden mb-3"
+            style={{ borderRadius: 16, border: "1px solid rgba(255,255,255,0.07)", height: 200 }}
+          >
+            <TrafficMap latitude={crossing.latitude} longitude={crossing.longitude} />
           </div>
         </div>
       </main>

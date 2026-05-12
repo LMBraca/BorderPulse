@@ -52,6 +52,8 @@ export interface HourlyPrediction {
   p75Wait: number | null;
   confidence: "low" | "medium" | "high";
   sampleCount: number;
+  nEff?: number | null;
+  nowcasted?: boolean | null;
 }
 
 export interface BestTimeSuggestion {
@@ -68,6 +70,7 @@ export interface PredictionResponse {
   date: string;
   hourly: HourlyPrediction[];
   bestTime: BestTimeSuggestion | null;
+  isHoliday?: boolean | null;
 }
 
 export type WaitStatus = "green" | "yellow" | "red" | "unknown" | "closed";
@@ -140,11 +143,11 @@ export const LANE_LABELS: Record<string, string> = {
 };
 
 export const STATUS_COLORS: Record<WaitStatus, string> = {
-  green: "#34D399",
-  yellow: "#FBBF24",
-  red: "#F87171",
+  green: "oklch(72% 0.14 148)",
+  yellow: "oklch(78% 0.14 68)",
+  red: "oklch(65% 0.17 25)",
   unknown: "#475569",
-  closed: "#475569",
+  closed: "#4B5563",
 };
 
 export const MX_STATE_ABBR: Record<string, string> = {
